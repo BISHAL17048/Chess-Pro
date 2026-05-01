@@ -1,0 +1,36 @@
+{
+  "name": "chess-backend",
+  "version": "1.0.0",
+  "description": "Chess game backend with Express and Socket.IO",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "kill-port 5000 && nodemon src/server.js"
+  },
+  "keywords": [
+    "chess",
+    "game",
+    "express",
+    "socket.io"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
+    "bcryptjs": "^3.0.3",
+    "chess.js": "^1.4.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^7.5.2",
+    "redis": "^4.7.0",
+    "socket.io": "^4.6.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "kill-port": "^2.0.1",
+    "nodemon": "^3.0.1"
+  }
+}

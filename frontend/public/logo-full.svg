@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" fill="none">
+  <defs>
+    <linearGradient id="logoGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8a6512"/>
+      <stop offset="35%" stop-color="#ffd84d"/>
+      <stop offset="55%" stop-color="#fff4bf"/>
+      <stop offset="75%" stop-color="#e0b625"/>
+      <stop offset="100%" stop-color="#8a6512"/>
+    </linearGradient>
+    <linearGradient id="logoTextGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="55%" stop-color="#ffe082"/>
+      <stop offset="100%" stop-color="#d4af37"/>
+    </linearGradient>
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="1.25" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Logo Icon -->
+  <g transform="translate(10, 10)">
+    <circle cx="40" cy="40" r="38" fill="#151515" stroke="#d4af37" stroke-width="2"/>
+    <circle cx="40" cy="40" r="33" fill="none" stroke="#a77f13" stroke-width="1" opacity="0.55"/>
+
+    <g transform="translate(40 40)">
+      <ellipse cx="0" cy="24" rx="15" ry="3" fill="#6f5610" opacity="0.8"/>
+      <ellipse cx="0" cy="22.5" rx="13.5" ry="2.3" fill="#d4af37"/>
+
+      <path d="M-8 22C-9 15-10 9-9 4C-8 0-7 -2-5 -4V-9H5V-4C7 -2 8 0 9 4C10 9 9 15 8 22H-8Z" fill="url(#logoGold)"/>
+      <path d="M-5.8 20.3C-6.5 14.4-7.2 9.2-6.4 5.2C-5.8 2.3-5 0.9-4 -0.4V-4.8H4V-0.4C5 0.9 5.8 2.3 6.4 5.2C7.2 9.2 6.5 14.4 5.8 20.3H-5.8Z" fill="#fff1a8" opacity="0.28"/>
+
+      <path d="M-4.8 -7H4.8V-3.6H-4.8Z" fill="#8a6512"/>
+      <path d="M-1.15 -14H1.15V-7.5H-1.15Z" fill="url(#logoGold)"/>
+      <path d="M-3.9 -11.3H3.9V-9H-3.9Z" fill="url(#logoGold)"/>
+    </g>
+    
+    <g transform="translate(19, 62)" opacity="0.9">
+      <rect x="0" y="0" width="5" height="5" fill="#d4af37"/>
+      <rect x="5" y="0" width="5" height="5" fill="#1a1a1a"/>
+      <rect x="10" y="0" width="5" height="5" fill="#d4af37"/>
+      <rect x="15" y="0" width="5" height="5" fill="#1a1a1a"/>
+      <rect x="20" y="0" width="5" height="5" fill="#d4af37"/>
+      <rect x="25" y="0" width="5" height="5" fill="#1a1a1a"/>
+      <rect x="30" y="0" width="5" height="5" fill="#d4af37"/>
+
+      <rect x="0" y="5" width="5" height="5" fill="#1a1a1a"/>
+      <rect x="5" y="5" width="5" height="5" fill="#d4af37"/>
+      <rect x="10" y="5" width="5" height="5" fill="#1a1a1a"/>
+      <rect x="15" y="5" width="5" height="5" fill="#d4af37"/>
+      <rect x="20" y="5" width="5" height="5" fill="#1a1a1a"/>
+      <rect x="25" y="5" width="5" height="5" fill="#d4af37"/>
+      <rect x="30" y="5" width="5" height="5" fill="#1a1a1a"/>
+    </g>
+  </g>
+  
+  <!-- Text -->
+  <g transform="translate(100, 25)" filter="url(#textGlow)">
+    <!-- "Chess" -->
+    <text x="0" y="45" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="42" font-weight="700" fill="url(#logoTextGold)">Chess</text>
+    
+    <!-- "Pro" with accent -->
+    <text x="135" y="45" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="42" font-weight="800" fill="#d4af37">Pro</text>
+    
+    <!-- Tagline -->
+    <text x="5" y="65" font-family="Segoe UI, Roboto, Arial, sans-serif" font-size="12" font-weight="500" fill="#a3a3a3" letter-spacing="2">MASTER THE GAME</text>
+  </g>
+  
+  <!-- Decorative elements -->
+  <g opacity="0.25">
+    <circle cx="380" cy="20" r="3" fill="#d4af37"/>
+    <circle cx="385" cy="35" r="2" fill="#fff4bf"/>
+    <circle cx="375" cy="50" r="2.5" fill="#d4af37"/>
+  </g>
+</svg>

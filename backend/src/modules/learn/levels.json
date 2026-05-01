@@ -1,0 +1,466 @@
+{
+  "rook": [
+    {
+      "fen": "8/8/8/8/8/8/4R3/8 w - -",
+      "apples": [
+        "e7"
+      ],
+      "nbMoves": 1,
+      "goal": "Move to the star!"
+    },
+    {
+      "fen": "8/2R5/8/8/8/8/8/8 w - -",
+      "apples": [
+        "c5",
+        "g5"
+      ],
+      "nbMoves": 2,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/3R4/8/8/8 w - -",
+      "apples": [
+        "a4",
+        "g3",
+        "g4"
+      ],
+      "nbMoves": 3,
+      "goal": "Grab all stars in fewer moves!"
+    },
+    {
+      "fen": "7R/8/8/8/8/8/8/8 w - -",
+      "apples": [
+        "f8",
+        "g1",
+        "g7",
+        "g8",
+        "h7"
+      ],
+      "nbMoves": 5,
+      "goal": "Grab all stars in fewer moves!"
+    },
+    {
+      "fen": "8/1R6/8/8/3R4/8/8/8 w - -",
+      "apples": [
+        "a4",
+        "g3",
+        "g7",
+        "h4"
+      ],
+      "nbMoves": 4,
+      "goal": "Use two rooks to speed things up!"
+    },
+    {
+      "fen": "8/8/8/8/8/5R2/8/R7 w - -",
+      "apples": [
+        "b7",
+        "d1",
+        "d5",
+        "f2",
+        "f7",
+        "g4",
+        "g7"
+      ],
+      "nbMoves": 7,
+      "goal": "Use two rooks to speed things up!"
+    }
+  ],
+  "bishop": [
+    {
+      "fen": "8/8/8/8/8/5B2/8/8 w - -",
+      "apples": [
+        "d5",
+        "g8"
+      ],
+      "nbMoves": 2,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/1B6/8/8 w - -",
+      "apples": [
+        "a2",
+        "b1",
+        "b5",
+        "d1",
+        "d3",
+        "e2"
+      ],
+      "nbMoves": 6,
+      "goal": "Grab all stars in fewer moves!"
+    },
+    {
+      "fen": "8/8/8/8/3B4/8/8/8 w - -",
+      "apples": [
+        "a1",
+        "b6",
+        "c1",
+        "e3",
+        "g7",
+        "h6"
+      ],
+      "nbMoves": 6,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/2B5/8/8/8 w - -",
+      "apples": [
+        "a4",
+        "b1",
+        "b3",
+        "c2",
+        "d3",
+        "e2"
+      ],
+      "nbMoves": 6,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/8/8/2B2B2 w - -",
+      "apples": [
+        "d3",
+        "d4",
+        "d5",
+        "e3",
+        "e4",
+        "e5"
+      ],
+      "nbMoves": 6,
+      "goal": "You need both bishops!"
+    },
+    {
+      "fen": "8/3B4/8/8/8/2B5/8/8 w - -",
+      "apples": [
+        "a3",
+        "c2",
+        "e7",
+        "f5",
+        "f6",
+        "g8",
+        "h4",
+        "h7"
+      ],
+      "nbMoves": 11,
+      "goal": "You need both bishops!"
+    }
+  ],
+  "queen": [
+    {
+      "fen": "8/8/8/8/8/8/4Q3/8 w - -",
+      "apples": [
+        "e5",
+        "b8"
+      ],
+      "nbMoves": 2,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/3Q4/8/8/8 w - -",
+      "apples": [
+        "a3",
+        "f2",
+        "f8",
+        "h3"
+      ],
+      "nbMoves": 4,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/2Q5/8/8/8 w - -",
+      "apples": [
+        "a3",
+        "d6",
+        "f1",
+        "f8",
+        "g3",
+        "h6"
+      ],
+      "nbMoves": 6,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/6Q1/8/8/8/8/8/8 w - -",
+      "apples": [
+        "a2",
+        "b5",
+        "d3",
+        "g1",
+        "g8",
+        "h2",
+        "h5"
+      ],
+      "nbMoves": 7,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/8/8/4Q3 w - -",
+      "apples": [
+        "a6",
+        "d1",
+        "f2",
+        "f6",
+        "g6",
+        "g8",
+        "h1",
+        "h4"
+      ],
+      "nbMoves": 9,
+      "goal": "Grab all the stars!"
+    }
+  ],
+  "knight": [
+    {
+      "fen": "8/8/8/8/4N3/8/8/8 w - -",
+      "apples": [
+        "c5",
+        "d7"
+      ],
+      "nbMoves": 2,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/8/8/1N6 w - -",
+      "apples": [
+        "c3",
+        "d4",
+        "e2",
+        "f3",
+        "f7",
+        "g5",
+        "h8"
+      ],
+      "nbMoves": 8,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/2N5/8/8/8/8/8/8 w - -",
+      "apples": [
+        "b6",
+        "d5",
+        "d7",
+        "e6",
+        "f4"
+      ],
+      "nbMoves": 5,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/5N2/8/8/8 w - -",
+      "apples": [
+        "e3",
+        "e4",
+        "e5",
+        "f3",
+        "f5",
+        "g3",
+        "g4",
+        "g5"
+      ],
+      "nbMoves": 9,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/3N4/8/8 w - -",
+      "apples": [
+        "c3",
+        "e2",
+        "e4",
+        "f2",
+        "f4",
+        "g6"
+      ],
+      "nbMoves": 6,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/2N5/8/8/8/8/8/8 w - -",
+      "apples": [
+        "b4",
+        "b5",
+        "c6",
+        "c8",
+        "d4",
+        "d5",
+        "e3",
+        "e7",
+        "f5"
+      ],
+      "nbMoves": 9,
+      "goal": "Grab all the stars!"
+    }
+  ],
+  "pawn": [
+    {
+      "fen": "8/8/8/P7/8/8/8/8 w - -",
+      "apples": [
+        "f3"
+      ],
+      "nbMoves": 4,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/5P2/8/8/8/8 w - -",
+      "apples": [
+        "b6",
+        "c4",
+        "d7",
+        "e5",
+        "a8"
+      ],
+      "nbMoves": 8,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/4P3/8/8 w - -",
+      "apples": [
+        "c6",
+        "d5",
+        "d7"
+      ],
+      "nbMoves": 4,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/1P6/8/8 w - -",
+      "apples": [
+        "b4",
+        "b6",
+        "c4",
+        "c6",
+        "c7",
+        "d6"
+      ],
+      "nbMoves": 8,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/3P4/8/8 w - -",
+      "apples": [
+        "c4",
+        "b5",
+        "b6",
+        "d5",
+        "d7",
+        "e6",
+        "c8"
+      ],
+      "nbMoves": 8,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/P1PP3P/8/8 w - -",
+      "apples": [
+        "b5",
+        "c5",
+        "d4",
+        "e5",
+        "g4"
+      ],
+      "nbMoves": 7,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/8/4P3/8 w - -",
+      "apples": [
+        "d6"
+      ],
+      "nbMoves": 3,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "8/8/8/8/8/8/2PPPP2/8 w - -",
+      "apples": [
+        "c5",
+        "d5",
+        "e5",
+        "f5",
+        "d3",
+        "e4"
+      ],
+      "nbMoves": 9,
+      "goal": "Grab all the stars!"
+    }
+  ],
+  "setup": [
+    {
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -",
+      "apples": [],
+      "nbMoves": 1,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "r6r/pppppppp/8/8/8/8/8/2RR4 w - -",
+      "apples": [
+        "a1",
+        "h1"
+      ],
+      "nbMoves": 2,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "rn4nr/pppppppp/8/8/8/8/2NN4/R6R w - -",
+      "apples": [
+        "b1",
+        "g1"
+      ],
+      "nbMoves": 4,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "rnb2bnr/pppppppp/8/8/4BB2/8/8/RN4NR w - -",
+      "apples": [
+        "c1",
+        "f1"
+      ],
+      "nbMoves": 4,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "rnbq1bnr/pppppppp/8/8/5Q2/8/8/RNB2BNR w - -",
+      "apples": [
+        "d1"
+      ],
+      "nbMoves": 2,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "rnbqkbnr/pppppppp/8/8/5K2/8/8/RNBQ1BNR w - -",
+      "apples": [
+        "e1"
+      ],
+      "nbMoves": 3,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -",
+      "apples": [],
+      "nbMoves": 1,
+      "goal": "Grab all the stars!"
+    }
+  ],
+  "enpassant": [
+    {
+      "fen": "rnbqkbnr/pppppppp/8/2P5/8/8/PP1PPPPP/RNBQKBNR b KQkq -",
+      "apples": [],
+      "nbMoves": 1,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "rnbqkbnr/ppp1pppp/8/2Pp3P/8/8/PP1PPPP1/RNBQKBNR b KQkq -",
+      "apples": [],
+      "nbMoves": 1,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "rnbqkbnr/pppppppp/P7/2P5/8/8/PP1PPPP1/RNBQKBNR b KQkq -",
+      "apples": [],
+      "nbMoves": 1,
+      "goal": "Grab all the stars!"
+    },
+    {
+      "fen": "rnbqkbnr/pppppppp/8/2PPP2P/8/8/PP1P1PP1/RNBQKBNR b KQkq -",
+      "apples": [],
+      "nbMoves": 4,
+      "goal": "Grab all the stars!"
+    }
+  ]
+}

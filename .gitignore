@@ -1,0 +1,55 @@
+# =========================
+# Node.js
+# =========================
+node_modules/
+
+# =========================
+# Build outputs
+# =========================
+dist/
+build/
+
+# =========================
+# Environment files
+# =========================
+.env
+.env.local
+.env.*.local
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# OS / Editor files
+# =========================
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# =========================
+# 🔥 Stockfish (VERY IMPORTANT)
+# =========================
+
+# Ignore your local Stockfish folder
+stockfish/
+
+# Ignore frontend wasm engine files
+frontend/public/stockfish/
+
+# Ignore large engine/model files
+*.exe
+*.wasm
+*.nnue
+
+# =========================
+# Optional large assets
+# =========================
+*.zip
+*.tar
+*.gz
+api-1.json

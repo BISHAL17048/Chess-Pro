@@ -1,0 +1,73 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #262421;
+  color: #e5e7eb;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3e3e42;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5f;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@layer components {
+  .chess-page {
+    @apply mx-auto w-full max-w-6xl space-y-5;
+  }
+
+  .chess-card {
+    @apply rounded-2xl border border-[#3a3a38] bg-[#262522]/90 p-5 backdrop-blur;
+  }
+
+  .chess-hero {
+    @apply overflow-hidden rounded-2xl border border-[#3a3a38] bg-[#1f1f1d] shadow-[0_18px_42px_rgba(0,0,0,0.35)];
+  }
+
+  .chess-btn-primary {
+    @apply rounded-lg bg-gradient-to-r from-[#80b64a] to-[#6ea13c] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110;
+  }
+
+  .chess-btn-secondary {
+    @apply rounded-lg border border-white/15 bg-black/15 px-4 py-2.5 text-sm text-slate-200 transition hover:border-cyan-300/60 hover:bg-cyan-400/10;
+  }
+}
