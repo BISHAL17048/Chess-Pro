@@ -1,4 +1,4 @@
-# ♟ Chess Web Application
+# ♟ Chess Pro
 
 A full-stack, real-time chess web application built with React, Node.js, Express, Socket.IO, and MongoDB.
 
