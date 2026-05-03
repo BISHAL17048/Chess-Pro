@@ -416,22 +416,37 @@ export function useStockfish() {
           setBestMove(move)
           setIsAnalyzing(false)
 
-          const finishedKey = activeAnalysisKeyRef.current
-          if (finishedKey) {
-            analysisCacheRef.current.set(finishedKey, {
+          // Prefer resolving any explicit pending async request first
+          const pending = pendingAsyncRef.current
+          if (pending) {
+            // consume pending and cache under the exact requested key
+            pendingAsyncRef.current = null
+            const cacheObj = {
               bestMove: move,
               evaluation: latestEvaluationRef.current,
               pvLines: [...pvLinesRef.current]
-            })
+            }
+            try {
+              if (pending.cacheKey) analysisCacheRef.current.set(pending.cacheKey, cacheObj)
+            } catch {
+              // ignore cache set failures
+            }
+            pending.resolve(cacheObj)
+            return
           }
 
-          const pending = pendingAsyncRef.current
-          if (pending) {
-            pendingAsyncRef.current = null
-            pending.resolve({
-              bestMove: move,
-              evaluation: latestEvaluationRef.current
-            })
+          // Fallback: use active analysis key (sync analysis)
+          const finishedKey = activeAnalysisKeyRef.current
+          if (finishedKey) {
+            try {
+              analysisCacheRef.current.set(finishedKey, {
+                bestMove: move,
+                evaluation: latestEvaluationRef.current,
+                pvLines: [...pvLinesRef.current]
+              })
+            } catch {
+              // ignore cache set failures
+            }
           }
         }
       }
@@ -509,16 +524,17 @@ export function useStockfish() {
 
   const analyzeFen = useCallback((fen, depth) => {
     const worker = workerRef.current
-    if (!worker) return
+    if (!worker) return false
     if (!ready) {
       setError('Stockfish is still loading')
-      return
+      return false
     }
 
+    const resolvedDepth = Math.max(8, Math.min(30, Math.floor(depth ?? analysisDepthRef.current)))
     const cacheKey = [
       'sync',
       fen,
-      Math.max(8, Math.min(30, Math.floor(depth ?? analysisDepthRef.current))),
+      resolvedDepth,
       powerModeRef.current,
       desiredVariantRef.current,
       selectedNnueNetworkIdRef.current,
@@ -535,7 +551,7 @@ export function useStockfish() {
       pvLinesRef.current = Array.isArray(cached.pvLines) ? [...cached.pvLines] : []
       setPvLines(pvLinesRef.current)
       latestEvaluationRef.current = cached.evaluation || null
-      return
+      return true
     }
 
     setError('')
@@ -550,7 +566,15 @@ export function useStockfish() {
     worker.postMessage('stop')
     worker.postMessage('ucinewgame')
     worker.postMessage(`position fen ${fen}`)
-    worker.postMessage(`go depth ${Math.max(8, Math.min(30, Math.floor(depth ?? analysisDepthRef.current)))}`)
+
+    // For max mode prefer movetime to let engine use threads efficiently and return fast.
+    if (powerModeRef.current === 'max') {
+      const moveTime = Math.max(100, Math.min(2000, Math.floor(resolvedDepth * 80)))
+      worker.postMessage(`go movetime ${moveTime}`)
+    } else {
+      worker.postMessage(`go depth ${resolvedDepth}`)
+    }
+    return true
   }, [ready])
 
   const analyzeFenAsync = useCallback((fen, depth) => {
@@ -608,7 +632,14 @@ export function useStockfish() {
       worker.postMessage('stop')
       worker.postMessage('ucinewgame')
       worker.postMessage(`position fen ${fen}`)
-      worker.postMessage(`go depth ${resolvedDepth}`)
+
+      // For max mode prefer movetime to keep latency low while using available threads.
+      if (powerModeRef.current === 'max') {
+        const moveTime = Math.max(100, Math.min(2000, Math.floor(resolvedDepth * 80)))
+        worker.postMessage(`go movetime ${moveTime}`)
+      } else {
+        worker.postMessage(`go depth ${resolvedDepth}`)
+      }
     })
   }, [ready])
 

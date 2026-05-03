@@ -85,6 +85,29 @@ const colorMap = {
   amber: { border: 'hover:border-amber-500/40', text: 'group-hover:text-amber-400', arrow: 'text-amber-400', badge: 'bg-amber-500/20 text-amber-300' }
 }
 
+const timeCategoryStyles = {
+  bullet: {
+    row: 'border-rose-400/25 bg-gradient-to-r from-rose-500/10 to-transparent',
+    icon: 'text-rose-300',
+    buttonActive: 'border-rose-300 bg-rose-500/20 text-rose-100 shadow-[0_0_0_1px_rgba(251,113,133,.35)]'
+  },
+  blitz: {
+    row: 'border-amber-400/25 bg-gradient-to-r from-amber-500/10 to-transparent',
+    icon: 'text-amber-300',
+    buttonActive: 'border-amber-300 bg-amber-500/20 text-amber-100 shadow-[0_0_0_1px_rgba(245,158,11,.35)]'
+  },
+  rapid: {
+    row: 'border-emerald-400/25 bg-gradient-to-r from-emerald-500/10 to-transparent',
+    icon: 'text-emerald-300',
+    buttonActive: 'border-emerald-300 bg-emerald-500/20 text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,.35)]'
+  },
+  classical: {
+    row: 'border-cyan-400/25 bg-gradient-to-r from-cyan-500/10 to-transparent',
+    icon: 'text-cyan-300',
+    buttonActive: 'border-cyan-300 bg-cyan-500/20 text-cyan-100 shadow-[0_0_0_1px_rgba(103,232,249,.35)]'
+  }
+}
+
 function PlaySection({ socket, onReviewClick, onLearnClick }) {
   const [view, setView] = useState('menu') // 'menu' | 'board' | 'tournament'
   const [selectedPreset, setSelectedPreset] = useState('5+0')
@@ -313,47 +336,77 @@ function PlaySection({ socket, onReviewClick, onLearnClick }) {
   const categories = ['bullet', 'blitz', 'rapid', 'classical']
 
   return (
-    <div className="chess-page">
-      {/* Hero */}
-      <div className="chess-hero relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-700/20 to-cyan-700/20 pointer-events-none" />
-        <div className="relative p-8 md:p-12">
-          <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-2">Play Chess</p>
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-3">Ready to Play?</h1>
-          <p className="text-lg text-slate-300 max-w-xl mb-8">Choose your time control, pick a mode, and jump right in.</p>
+    <div className="chess-page space-y-5">
+      <div className="chess-hero p-6">
+        <div className="relative grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
+          <div className="md:col-span-8">
+            <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.24em] text-emerald-300">Play Zone</p>
+            <h1 className="text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">Play Chess Like a Pro</h1>
+            <p className="mt-3 max-w-2xl text-sm text-slate-300 md:text-base">
+              Pick your pace and queue instantly for rated or casual matches.
+            </p>
+          </div>
 
-          {/* Time control selector */}
-          <div className="space-y-4">
-            {categories.map((cat) => {
-              const cfg = categoryConfig[cat]
-              const presets = timePresets.filter((p) => p.category === cat)
-              return (
-                <div key={cat} className="flex items-center gap-3 flex-wrap">
-                  <span className="w-24 flex items-center gap-2 text-sm font-bold text-slate-400">
-                    <span>{cfg.icon}</span> {cfg.label}
-                  </span>
-                  {presets.map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => setSelectedPreset(p.id)}
-                      className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-                        selectedPreset === p.id
-                          ? `border-${cfg.color}-400 bg-${cfg.color}-500/20 text-${cfg.color}-200 shadow-lg shadow-${cfg.color}-500/10`
-                          : 'border-white/10 bg-[#252526] text-slate-300 hover:border-white/20 hover:bg-[#2d2d30]'
-                      }`}
-                    >
-                      {p.detail}
-                    </button>
-                  ))}
-                </div>
-              )
-            })}
+          <div className="md:col-span-4">
+            <div className="chess-card">
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400">Quick Launch</p>
+              <p className="mt-1 text-lg font-bold text-white">{selectedPresetMeta.label} • {selectedPresetMeta.detail}</p>
+              <p className="mt-1 text-xs text-slate-400">Mode: {selectedMode === 'rated' ? 'Play Online' : selectedMode}</p>
+              <button
+                onClick={() => { setSelectedMode('rated'); setView('board') }}
+                className="mt-4 w-full chess-btn-primary"
+              >
+                Start Match
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Mode cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="chess-card">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="text-lg font-bold text-white md:text-xl">Time Controls</h2>
+          <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-300">
+            Selected: {selectedPresetMeta.detail}
+          </span>
+        </div>
+
+        <div className="space-y-3">
+          {categories.map((cat) => {
+            const cfg = categoryConfig[cat]
+            const style = timeCategoryStyles[cat]
+            const presets = timePresets.filter((p) => p.category === cat)
+            return (
+              <div key={cat} className={`chess-card p-3 ${style.row}`}>
+                <div className="flex flex-col gap-2 md:flex-row md:items-center">
+                  <div className="md:w-28">
+                    <p className={`text-sm font-black uppercase tracking-wide ${style.icon}`}>
+                      {cfg.icon} {cfg.label}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {presets.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedPreset(p.id)}
+                        className={`rounded-xl px-3 py-1.5 text-sm font-semibold transition ${
+                          selectedPreset === p.id
+                            ? style.buttonActive
+                            : 'border-white/10 bg-[#1c1d1f] text-slate-300 hover:border-white/20 hover:bg-[#27282b]'
+                        }`}
+                      >
+                        {p.detail}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {GAME_MODES.map((mode) => {
           const cls = colorMap[mode.color]
           return (
@@ -365,35 +418,19 @@ function PlaySection({ socket, onReviewClick, onLearnClick }) {
                 setSelectedMode(mode.id)
                 setView('board')
               }}
-              className={`group flex flex-col items-start p-6 rounded-2xl border border-white/5 bg-[#252526] hover:bg-[#2d2d30] ${cls.border} transition-all text-left shadow-lg`}
+              className={`group relative flex flex-col items-start overflow-hidden rounded-2xl border border-white/10 bg-[#252526] p-6 text-left shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#2d2d30] ${cls.border}`}
             >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
               {mode.icon}
               <h3 className={`text-xl font-bold text-white mb-1 ${cls.text} transition-colors`}>{mode.name}</h3>
               <p className="text-sm text-slate-400 mb-4">{mode.subtitle}</p>
-              <div className={`mt-auto text-sm font-bold ${cls.arrow} flex items-center gap-1 group-hover:translate-x-1 transition-transform`}>
+              <div className={`mt-auto flex items-center gap-1 text-sm font-bold ${cls.arrow} transition-transform group-hover:translate-x-1`}>
                 Play now
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
               </div>
             </button>
           )
         })}
-      </div>
-
-      {/* Quick-start strip */}
-      <div className="chess-card px-6 py-4 flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Quick start</p>
-          <p className="text-white font-semibold">
-            {selectedPresetMeta.label} · {selectedPresetMeta.detail}
-            <span className="ml-2 text-xs text-slate-400">Selected</span>
-          </p>
-        </div>
-        <button
-          onClick={() => { setSelectedMode('rated'); setView('board') }}
-          className="chess-btn-primary px-8 py-3 text-base font-bold shadow-lg shadow-emerald-500/25 transform hover:-translate-y-0.5"
-        >
-          Play now ⚡
-        </button>
       </div>
     </div>
   )

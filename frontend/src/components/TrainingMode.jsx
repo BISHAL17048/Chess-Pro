@@ -4,12 +4,6 @@ import { Chess } from 'chess.js'
 import { useStockfish } from '../hooks/useStockfish'
 import { useSoundEffects } from '../hooks/useSoundEffects'
 import { BOARD_THEMES, useBoardThemeStore } from '../store/useBoardThemeStore'
-import {
-  fetchLichessDailyPuzzle,
-  fetchLichessLivePuzzles,
-  fetchLichessNextPuzzle,
-  fetchLichessPuzzleBatch
-} from '../utils/lichessApi'
 import { fetchProgressOverview, recordPuzzleAttempt } from '../utils/progressApi'
 
 function isBoardSquare(square) {
@@ -515,20 +509,12 @@ function TrainingMode() {
     setPuzzleError('')
 
     try {
-      const data = await fetchLichessDailyPuzzle()
+      // Use a local daily fallback puzzle
+      const idx = fallbackCursor % LOCAL_FALLBACK_PUZZLES.length
+      const data = LOCAL_FALLBACK_PUZZLES[idx]
       hydratePuzzle(data, 'Daily Puzzle')
     } catch (e) {
-      try {
-        const backup = await fetchLichessNextPuzzle({
-          angle: themeAngle,
-          difficulty,
-          color: forcedColor
-        })
-        hydratePuzzle(backup, `Fallback • ${themeAngle}`)
-        setPuzzleError('Daily puzzle unavailable. Loaded a random fallback puzzle instead.')
-      } catch {
-        setPuzzleError(e?.message || 'Daily puzzle source unavailable.')
-      }
+      setPuzzleError(e?.message || 'Daily puzzle source unavailable.')
     } finally {
       setPuzzleLoading(false)
     }
@@ -539,14 +525,10 @@ function TrainingMode() {
     setPuzzleError('')
 
     try {
-      const data = await fetchLichessNextPuzzle({
-        angle: themeAngle,
-        difficulty,
-        color: forcedColor
-      })
+      const data = LOCAL_FALLBACK_PUZZLES[Math.floor(Math.random() * LOCAL_FALLBACK_PUZZLES.length)]
       hydratePuzzle(data, `Random • ${themeAngle}`)
     } catch (e) {
-      setPuzzleError(e?.message || 'Failed to load random puzzle from Lichess.')
+      setPuzzleError(e?.message || 'Failed to load random puzzle.')
     } finally {
       setPuzzleLoading(false)
     }
@@ -557,14 +539,15 @@ function TrainingMode() {
     setBatchError('')
 
     try {
-      const data = await fetchLichessPuzzleBatch({
-        angle: themeAngle,
-        difficulty,
-        nb: batchSize,
-        color: forcedColor
-      })
+      // Create a batch by repeating/shuffling local puzzles
+      const nb = Math.max(1, Math.min(200, Number(batchSize || 20)))
+      const items = []
+      for (let i = 0; i < nb; i += 1) {
+        const src = LOCAL_FALLBACK_PUZZLES[i % LOCAL_FALLBACK_PUZZLES.length]
+        items.push({ ...src, puzzle: { ...src.puzzle, id: `${src.puzzle.id}-${i}` } })
+      }
 
-      const incoming = Array.isArray(data?.puzzles) ? data.puzzles : []
+      const incoming = items
       if (!incoming.length) {
         setBatchError('No puzzles returned for this filter. Try another theme or difficulty.')
         if (!append) {
@@ -588,7 +571,7 @@ function TrainingMode() {
         setBatchPuzzles([])
         setActiveBatchIndex(-1)
       }
-      setBatchError(e?.message || 'Failed to load puzzle batch from Lichess.')
+      setBatchError(e?.message || 'Failed to load puzzle batch.')
     } finally {
       setBatchLoading(false)
     }
@@ -599,14 +582,14 @@ function TrainingMode() {
     setBatchError('')
 
     try {
-      const data = await fetchLichessLivePuzzles({
-        angle: themeAngle,
-        difficulty,
-        count: Math.max(1, Math.min(50, Number(requestedCount || batchSize))),
-        color: forcedColor
+      // Live puzzles: use a shuffled subset of local puzzles
+      const count = Math.max(1, Math.min(50, Number(requestedCount || batchSize)))
+      const shuffled = [...LOCAL_FALLBACK_PUZZLES].sort(() => Math.random() - 0.5)
+      const incoming = Array.from({ length: count }, (_, i) => {
+        const src = shuffled[i % shuffled.length]
+        return { ...src, puzzle: { ...src.puzzle, id: `${src.puzzle.id}-live-${i}` } }
       })
 
-      const incoming = Array.isArray(data?.puzzles) ? data.puzzles : []
       if (!incoming.length) {
         setBatchError('No live puzzles returned. Try another filter.')
         if (!append) {
@@ -626,40 +609,11 @@ function TrainingMode() {
       setActiveBatchIndex(nextIndex)
       hydratePuzzle(resolvedList[nextIndex], `Live • ${themeAngle}`)
     } catch (liveError) {
-      try {
-        const backup = await fetchLichessPuzzleBatch({
-          angle: themeAngle,
-          difficulty,
-          nb: batchSize,
-          color: forcedColor
-        })
-
-        const incoming = Array.isArray(backup?.puzzles) ? backup.puzzles : []
-        if (!incoming.length) {
-          throw new Error('No puzzles returned from fallback batch')
-        }
-
-        let resolvedList = incoming
-        setBatchPuzzles((prev) => {
-          resolvedList = append ? mergeUniquePuzzles(prev, incoming) : incoming
-          return resolvedList
-        })
-
-        const nextIndex = append && activeBatchIndex >= 0 && resolvedList[activeBatchIndex] ? activeBatchIndex : 0
-        setActiveBatchIndex(nextIndex)
-        hydratePuzzle(resolvedList[nextIndex], `Batch • ${themeAngle}`)
-        setBatchError(`Live feed unavailable. Loaded standard batch instead.`)
-      } catch (batchFallbackError) {
-        if (!append) {
-          setBatchPuzzles([])
-          setActiveBatchIndex(-1)
-        }
-        setBatchError(
-          liveError?.message
-            || batchFallbackError?.message
-            || 'Failed to load live puzzles from Lichess.'
-        )
+      if (!append) {
+        setBatchPuzzles([])
+        setActiveBatchIndex(-1)
       }
+      setBatchError(liveError?.message || 'Failed to load live puzzles.')
     } finally {
       setBatchLoading(false)
     }

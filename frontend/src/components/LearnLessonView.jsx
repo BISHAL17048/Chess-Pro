@@ -78,27 +78,51 @@ function LearnLessonView({ lesson, onBack }) {
     }
   }, [])
 
+  const FALLBACK_LESSON_DATA = {
+    rook: [
+      { fen: '8/8/8/8/8/8/8/R7 w - - 0 1', goal: 'Move the rook to the star.', apples: ['a8'], hint: 'Rooks move in straight lines.' },
+      { fen: '8/8/8/8/8/8/8/R7 w - - 0 1', goal: 'Collect all stars.', apples: ['h1', 'h8', 'a8'], hint: 'Plan your path: right, up, left.' }
+    ],
+    bishop: [
+      { fen: '8/8/8/8/8/8/8/B7 w - - 0 1', goal: 'Move the bishop to the star.', apples: ['h8'], hint: 'Bishops move on diagonals.' },
+      { fen: '8/8/8/8/8/8/8/B7 w - - 0 1', goal: 'Collect all stars.', apples: ['a8', 'h1'], hint: 'Zig-zag across the board.' }
+    ],
+    queen: [
+      { fen: '8/8/8/8/8/8/8/Q7 w - - 0 1', goal: 'Move the queen to the star.', apples: ['h8'], hint: 'Queens move like rooks and bishops combined.' },
+    ],
+    default: [
+      { fen: '8/8/8/4k3/8/8/8/3K4 w - - 0 1', goal: 'Collect the star to complete the lesson.', apples: ['d5'], hint: 'Move your piece to the square with the star.' }
+    ]
+  }
+
   useEffect(() => {
     let active = true
     setLoading(true)
     fetch(`/api/learn/stage/${lesson.id}`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('API not available')
+        return res.json()
+      })
       .then(payload => {
         if (!active) return
         if (payload.success && payload.data && payload.data.length > 0) {
           setLevels(payload.data)
           loadLevel(payload.data[0])
         } else {
-          // Check if this is a known empty category or failed fetch
-          console.warn('No levels found for', lesson.id)
-          setCompleted(true)
+          throw new Error('Empty response')
         }
       })
-      .catch(console.error)
+      .catch(err => {
+        if (!active) return
+        console.warn('API fetch failed, using fallback data for', lesson.id, err)
+        const fallback = FALLBACK_LESSON_DATA[lesson.id] || FALLBACK_LESSON_DATA.default
+        setLevels(fallback)
+        loadLevel(fallback[0])
+      })
       .finally(() => { if (active) setLoading(false) })
       
     return () => { active = false }
-  }, [lesson.id])
+  }, [lesson.id, loadLevel])
 
   // Helper to ensure FEN has kings so chess.js doesn't crash
   const ensureKings = (fen) => {
@@ -184,6 +208,18 @@ function LearnLessonView({ lesson, onBack }) {
 
   const [visualFen, setVisualFen] = useState('8/8/8/8/8/8/8/8 w - - 0 1')
   const [baseOriginalFen, setBaseOriginalFen] = useState('')
+
+  const safeFenOrFallback = (fen) => {
+    try {
+      // validate with chess.js
+      const g = new Chess(fen)
+      // if chess.js returns a valid fen, use it
+      return fen
+    } catch (err) {
+      console.warn('Invalid FEN detected, using empty board fallback', fen, err)
+      return '8/8/8/8/8/8/8/8 w - - 0 1'
+    }
+  }
 
   const loadLevel = useCallback((levelData) => {
     try {
@@ -309,30 +345,31 @@ function LearnLessonView({ lesson, onBack }) {
       </div>
 
       {completed ? (
-        <div className="bg-[#1f1f1f] border border-emerald-500/30 rounded-2xl p-12 text-center shadow-2xl">
-          <div className="w-20 h-20 mx-auto bg-emerald-500/20 rounded-full flex items-center justify-center mb-6">
+        <div className="chess-card text-center shadow-2xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent pointer-events-none" />
+          <div className="w-20 h-20 mx-auto bg-emerald-500/20 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(52,211,153,0.3)]">
             <span className="text-4xl">🌟</span>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-4">Lesson Complete!</h2>
+          <h2 className="font-serif text-3xl font-bold text-white mb-4">Lesson Complete!</h2>
           <p className="text-slate-400 mb-8">You have mastered the basics of {lesson.title}.</p>
           
           <div className="grid grid-cols-3 gap-4 mb-8 max-w-md mx-auto">
-            <div className="bg-[#2d2d30] rounded-lg p-4">
-              <p className="text-2xl font-bold text-white">{Math.floor(elapsedTime / 60)}:{String(elapsedTime % 60).padStart(2, '0')}</p>
-              <p className="text-xs text-slate-400">Time</p>
+            <div className="card-compact text-center">
+              <p className="font-serif text-2xl font-bold text-white">{Math.floor(elapsedTime / 60)}:{String(elapsedTime % 60).padStart(2, '0')}</p>
+              <p className="text-[11px] uppercase tracking-wider text-slate-400 mt-1">Time</p>
             </div>
-            <div className="bg-[#2d2d30] rounded-lg p-4">
-              <p className="text-2xl font-bold text-white">{mistakes}</p>
-              <p className="text-xs text-slate-400">Mistakes</p>
+            <div className="card-compact text-center">
+              <p className="font-serif text-2xl font-bold text-white">{mistakes}</p>
+              <p className="text-[11px] uppercase tracking-wider text-slate-400 mt-1">Mistakes</p>
             </div>
-            <div className="bg-[#2d2d30] rounded-lg p-4">
-              <p className="text-2xl font-bold text-white">{perfectScore ? '✓' : '✗'}</p>
-              <p className="text-xs text-slate-400">Perfect</p>
+            <div className="card-compact text-center">
+              <p className="font-serif text-2xl font-bold text-white">{perfectScore ? '✓' : '✗'}</p>
+              <p className="text-[11px] uppercase tracking-wider text-slate-400 mt-1">Perfect</p>
             </div>
           </div>
 
           {perfectScore && (
-            <div className="mb-6 inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/30 rounded-full px-4 py-2">
+            <div className="mb-6 inline-flex items-center gap-2 bg-amber-500/20 border border-amber-500/30 rounded-full px-4 py-2 shadow-[0_0_15px_rgba(243,194,75,0.2)]">
               <span className="text-amber-400">💯</span>
               <span className="text-sm font-semibold text-amber-300">Perfect Score Achievement!</span>
             </div>
@@ -340,17 +377,17 @@ function LearnLessonView({ lesson, onBack }) {
 
           <button 
             onClick={onBack}
-            className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-xl shadow-lg transition"
+            className="chess-btn-primary px-8 mt-2"
           >
             Back to Courses
           </button>
         </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-8 items-start h-full min-h-0">
-          <div ref={boardFrameRef} className="w-full max-w-[500px] aspect-square flex-shrink-0 bg-[#1a1a1a] p-4 rounded-xl border border-white/10 shadow-xl flex items-center justify-center">
-            <Chessboard 
+          <div ref={boardFrameRef} className="chess-card w-full max-w-[500px] aspect-square flex-shrink-0 flex items-center justify-center p-4">
+              <Chessboard 
               boardWidth={boardWidth}
-              position={visualFen} 
+              position={safeFenOrFallback(visualFen)} 
               onPieceDrop={onDrop}
               animationDuration={200}
               customSquareStyles={customSquareStyles}
@@ -366,51 +403,51 @@ function LearnLessonView({ lesson, onBack }) {
             />
           </div>
           <div className="flex-1">
-            <div className="bg-[#252526] border border-white/10 rounded-xl p-6">
+            <div className="chess-card">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white">Goal</h3>
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="text-slate-400">⏱️ {Math.floor(elapsedTime / 60)}:{String(elapsedTime % 60).padStart(2, '0')}</span>
-                  <span className="text-slate-400">❌ {mistakes}</span>
+                <h3 className="font-serif text-xl font-bold text-white">Goal</h3>
+                <div className="flex items-center gap-4 text-sm font-semibold">
+                  <span className="text-slate-300">⏱️ {Math.floor(elapsedTime / 60)}:{String(elapsedTime % 60).padStart(2, '0')}</span>
+                  <span className="text-rose-400">❌ {mistakes}</span>
                 </div>
               </div>
-              <p className="text-slate-300 text-lg mb-6">{levels[currentLevelIdx]?.goal || 'Complete the objective!'}</p>
+              <p className="text-slate-300 text-lg mb-6 leading-relaxed">{levels[currentLevelIdx]?.goal || 'Complete the objective!'}</p>
               
-              <div className="mb-6 p-4 bg-[#1f1f1f] rounded-lg border border-white/10">
-                <p className="text-sm text-slate-400 mb-2">Level {currentLevelIdx + 1} of {levels.length}</p>
-                <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div className="mb-6 card-compact bg-[rgba(255,255,255,0.02)]">
+                <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-2">Level {currentLevelIdx + 1} of {levels.length}</p>
+                <div className="h-1.5 bg-[#1e1e1e] rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300"
+                    className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 shadow-[0_0_10px_rgba(34,211,238,0.5)]"
                     style={{ width: `${((currentLevelIdx + 1) / levels.length) * 100}%` }}
                   />
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">1</div>
-                  <p className="text-sm text-slate-400">Click and drag your piece</p>
+              <div className="space-y-3">
+                <div className="card-compact !p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold text-xs shrink-0 shadow-inner">1</div>
+                  <p className="text-[13px] font-medium text-slate-300">Click and drag your piece</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">2</div>
-                  <p className="text-sm text-slate-400">Move it to the star to collect it</p>
+                <div className="card-compact !p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xs shrink-0 shadow-inner">2</div>
+                  <p className="text-[13px] font-medium text-slate-300">Move it to the star to collect it</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400 font-bold">3</div>
-                  <p className="text-sm text-slate-400">Collect all stars to advance</p>
+                <div className="card-compact !p-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-xs shrink-0 shadow-inner">3</div>
+                  <p className="text-[13px] font-medium text-slate-300">Collect all stars to advance</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowHint(!showHint)}
-                className="mt-6 w-full py-2 border border-cyan-300/30 text-cyan-300 rounded-lg hover:bg-cyan-500/10 transition text-sm"
+                className="mt-6 w-full chess-btn-secondary"
               >
                 💡 {showHint ? 'Hide Hint' : 'Show Hint'}
               </button>
 
               {showHint && (
-                <div className="mt-3 p-3 bg-cyan-500/10 border border-cyan-300/20 rounded-lg">
-                  <p className="text-sm text-cyan-200">
+                <div className="mt-4 p-4 border-l-2 border-cyan-400 bg-cyan-500/10 rounded-r-lg">
+                  <p className="text-sm font-medium text-cyan-100 leading-relaxed">
                     {levels[currentLevelIdx]?.hint || 'Look for the shortest path to collect all stars. Plan your moves ahead!'}
                   </p>
                 </div>

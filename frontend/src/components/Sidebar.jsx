@@ -3,11 +3,12 @@ import { useAuthStore } from '../store/useAuthStore'
 
 const navItems = [
   { id: 'home', label: 'Home', icon: 'home' },
+  { id: 'profile', label: 'Profile', icon: 'profile' },
   { id: 'play', label: 'Play', icon: 'play' },
   { id: 'puzzles', label: 'Puzzles', icon: 'puzzle' },
   { id: 'learn', label: 'Learn', icon: 'learn' },
   { id: 'watch', label: 'Watch', icon: 'watch' },
-  { id: 'news', label: 'Review', icon: 'news' },
+  { id: 'review', label: 'Review', icon: 'review' },
   { id: 'social', label: 'Social', icon: 'social' }
 ]
 
@@ -25,6 +26,10 @@ function Icon({ name, className = 'h-5 w-5' }) {
       return <svg {...common}><path d='M4 6 12 3l8 3-8 3-8-3Zm0 5 8 3 8-3M4 16l8 3 8-3' /></svg>
     case 'watch':
       return <svg {...common}><circle cx='12' cy='12' r='8' /><path d='M12 8v5l3 2' /></svg>
+    case 'review':
+      return <svg {...common}><path d='M9 3h6v4h3v4h-3v2h3v8H6v-8h3v-2H6V7h3V3Z' /><path d='M12 13v4' strokeLinecap='round'/><circle cx='12' cy='13' r='0.5' fill='currentColor'/></svg>
+    case 'profile':
+      return <svg {...common}><path d='M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z' /><path d='M4 21a8 8 0 0 1 16 0' /></svg>
     case 'news':
       return <svg {...common}><path d='M5 4h14v16H5z' /><path d='M8 8h8M8 12h8M8 16h5' /></svg>
     default:
@@ -126,35 +131,6 @@ function Sidebar({
         </nav>
 
         <div className='mt-auto space-y-3'>
-          {!collapsed && (
-            <div className='rounded-xl border border-white/10 bg-[#252526] p-3'>
-              <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-slate-300'>Board Theme</p>
-              <div className='grid grid-cols-2 gap-2'>
-                {BOARD_THEMES.map((theme) => {
-                  const selected = theme.id === themeId
-                  return (
-                    <button
-                      key={theme.id}
-                      onClick={() => setThemeId(theme.id)}
-                      className={[
-                        'rounded-lg border px-2 py-1.5 text-xs text-slate-200 transition',
-                        selected
-                          ? 'border-cyan-300/70 bg-cyan-400/10'
-                          : 'border-white/10 bg-[#2d2d30] hover:border-white/25'
-                      ].join(' ')}
-                    >
-                      <div className='mb-1 flex h-5 overflow-hidden rounded border border-black/20'>
-                        <span className='block h-full flex-1' style={{ backgroundColor: theme.light }} />
-                        <span className='block h-full flex-1' style={{ backgroundColor: theme.dark }} />
-                      </div>
-                      {theme.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
           <div className={[
             'rounded-xl border border-white/10 bg-[#252526] transition',
             collapsed ? 'flex items-center justify-center p-2' : 'p-2'

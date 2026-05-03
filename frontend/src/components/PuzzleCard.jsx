@@ -1,5 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchLichessDailyPuzzle } from '../utils/lichessApi'
+
+// Local fallback daily puzzle (self-contained, inspired by lichess daily)
+const LOCAL_DAILY_PUZZLE = {
+  puzzle: {
+    id: 'local-daily-1',
+    fen: '6k1/5ppp/8/8/8/6Q1/5PPP/6K1 w - - 0 1',
+    rating: 950,
+    plays: 42,
+    themes: ['mate', 'endgame']
+  },
+  game: {
+    perf: { name: 'Practice' },
+    players: [{ color: 'white', name: 'White' }, { color: 'black', name: 'Black' }]
+  }
+}
 
 function PuzzleCard({ onOpenPuzzles }) {
   const [loading, setLoading] = useState(true)
@@ -8,7 +22,7 @@ function PuzzleCard({ onOpenPuzzles }) {
 
   const puzzleUrl = useMemo(() => {
     const id = dailyPuzzle?.puzzle?.id
-    return id ? `https://lichess.org/training/${id}` : 'https://lichess.org/training'
+    return id ? `#/learn/puzzle/${id}` : '#/learn/puzzle'
   }, [dailyPuzzle])
 
   const loadDailyPuzzle = async () => {
@@ -16,8 +30,9 @@ function PuzzleCard({ onOpenPuzzles }) {
     setError('')
 
     try {
-      const data = await fetchLichessDailyPuzzle()
-      setDailyPuzzle(data)
+      // Use local daily puzzle to avoid external Lichess dependency
+      await new Promise((r) => setTimeout(r, 250))
+      setDailyPuzzle(LOCAL_DAILY_PUZZLE)
     } catch (e) {
       setError(e?.message || 'Failed to load daily puzzle')
     } finally {

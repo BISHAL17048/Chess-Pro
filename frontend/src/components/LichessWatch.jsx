@@ -437,18 +437,18 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
 
       if (host.includes('youtube.com')) {
         const id = parsed.searchParams.get('v')
-        if (id) return withOrigin(`https://www.youtube.com/embed/${encodeURIComponent(id)}`)
+        if (id) return withOrigin(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`)
 
         const parts = parsed.pathname.split('/').filter(Boolean)
         const embedIndex = parts.findIndex((part) => part === 'embed' || part === 'live' || part === 'shorts')
         if (embedIndex >= 0 && parts[embedIndex + 1]) {
-          return withOrigin(`https://www.youtube.com/embed/${encodeURIComponent(parts[embedIndex + 1])}`)
+          return withOrigin(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(parts[embedIndex + 1])}`)
         }
       }
 
       if (host === 'youtu.be') {
         const id = parsed.pathname.replace(/^\//, '')
-        if (id) return withOrigin(`https://www.youtube.com/embed/${encodeURIComponent(id)}`)
+        if (id) return withOrigin(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`)
       }
 
       if (host.includes('twitch.tv')) {
@@ -719,10 +719,15 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
     setTournamentPly(9999)
     if (openViewer) setIsGameViewerOpen(true)
 
+    // Do not record ephemeral live broadcast views in the user's history
+    // (match lichess behavior: watching a broadcast shouldn't create a saved history entry).
     if (!hideLiveOptions && game.id && !watchedGameIdsRef.current.has(game.id)) {
       watchedGameIdsRef.current.add(game.id)
-      const source = selectedBroadcastRound ? 'broadcast' : 'tournament'
-      recordWatchView({ source }).catch(() => {})
+      // Only record tournament/game views that are part of a tournament feed (not transient broadcasts)
+      const isBroadcast = Boolean(selectedBroadcastRound || selectedBroadcast)
+      if (!isBroadcast) {
+        recordWatchView({ source: 'tournament' }).catch(() => {})
+      }
     }
 
     if (game.pgn) {
@@ -2305,8 +2310,10 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
     }
 
     analysisDebounceRef.current = setTimeout(() => {
-      lastAnalysisKeyRef.current = analysisKey
-      analyzeFen(activeBoardFen, targetDepth)
+      const started = analyzeFen(activeBoardFen, targetDepth)
+      if (started) {
+        lastAnalysisKeyRef.current = analysisKey
+      }
     }, 260)
 
     return () => {
@@ -2315,6 +2322,12 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
       }
     }
   }, [qualityRunning, hideLiveOptions, canShowMeVsBotAnalysis, botThinking, meVsBotGameState.isOver, isGameViewerOpen, selectedTournamentGame?.id, activeBoardFen, engineReady, nnueMode, selectedNnueNetworkId, analyzeFen, analysisDepth])
+
+  useEffect(() => {
+    if (!engineReady) {
+      lastAnalysisKeyRef.current = ''
+    }
+  }, [engineReady])
 
   useEffect(() => {
     if (!isGameViewerOpen || !selectedTournamentGame?.id) return
@@ -3149,124 +3162,143 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
       )}
 
       {isGameViewerOpen && selectedTournamentGame && (
-        <div className={analysisOnly ? 'max-h-[calc(100vh-150px)] overflow-y-auto rounded-2xl border border-white/10 bg-[#1f1f1f] p-2 sm:p-3' : 'fixed inset-0 z-50 overflow-hidden bg-[#1f1f1f] p-2 sm:p-3'}>
-          <div className={`${analysisOnly ? 'overflow-y-auto' : 'h-full overflow-hidden'} w-full rounded-xl border border-white/10 bg-[#1e1e1e] p-2 sm:p-3`}>
+        <div className={analysisOnly ? 'max-h-[calc(100vh-150px)] overflow-y-auto rounded-2xl border border-white/[0.08] bg-gradient-to-br from-[#1e1e1e] via-[#1e1e1e] to-[#1e1e1e] p-2 sm:p-3 shadow-2xl' : 'fixed inset-0 z-50 overflow-hidden bg-gradient-to-br from-[#1a1a1a] via-[#1e1e1e] to-[#1a1a1a] p-2 sm:p-3'}>
+          <div className={`${analysisOnly ? 'overflow-y-auto' : 'h-full overflow-hidden'} w-full rounded-2xl border border-white/[0.07] bg-[#1e1e1e]/80 backdrop-blur-sm p-2 sm:p-3`}>
             <div className={`grid ${analysisOnly ? 'min-h-0' : 'h-full'} grid-cols-1 items-start gap-3 xl:grid-cols-[240px_minmax(0,1fr)_minmax(320px,430px)]`}>
-              <aside className={`${analysisOnly ? 'max-h-[calc(100vh-220px)] overflow-y-auto' : ''} rounded-xl bg-[#252526] p-3 text-white`}>
-                <div className='rounded-lg bg-[#2d2d30] p-2'>
-                  <div className='mb-2 flex items-center gap-2'>
+              <aside className={`${analysisOnly ? 'max-h-[calc(100vh-220px)] overflow-y-auto' : ''} rounded-2xl border border-white/[0.07] bg-gradient-to-b from-[#252526]/90 to-[#1e1e1e]/90 p-3 text-white backdrop-blur-sm`}>
+                <div className='relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-[#252526] to-[#1e1e1e] p-3 shadow-lg'>
+                  <div className='pointer-events-none absolute inset-0 bg-gradient-to-br from-slate-400/[0.04] to-transparent' />
+                  <div className='relative flex items-center gap-3'>
                     {!hideLiveOptions && selectedTournamentGame.blackPhoto ? (
-                      <img
-                        src={selectedTournamentGame.blackPhoto}
-                        alt={displayName(selectedTournamentGame.black)}
-                        className='h-20 w-20 rounded object-cover'
-                      />
+                      <div className="relative h-16 w-16 shrink-0">
+                        <div className='absolute inset-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 text-base font-bold ring-2 ring-white/10 shadow-md'>
+                          {initials(displayName(selectedTournamentGame.black))}
+                        </div>
+                        <img
+                          src={selectedTournamentGame.blackPhoto}
+                          alt={displayName(selectedTournamentGame.black)}
+                          className='absolute inset-0 h-16 w-16 rounded-xl object-cover ring-2 ring-white/10 shadow-md'
+                          onError={(e) => { e.target.style.display = 'none' }}
+                        />
+                      </div>
                     ) : hideLiveOptions ? (
                       <img
                         src={selectedBotAvatar}
                         alt={`${selectedBot.name} avatar`}
-                        className='h-20 w-20 rounded object-cover'
+                        className='shrink-0 h-16 w-16 rounded-xl object-cover ring-2 ring-indigo-400/30 shadow-md'
                       />
                     ) : (
-                      <div className='flex h-20 w-20 items-center justify-center rounded bg-[#4a4a4a] text-sm font-semibold'>
+                      <div className='shrink-0 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-slate-600 to-slate-800 text-base font-bold ring-2 ring-white/10 shadow-md'>
                         {initials(displayName(selectedTournamentGame.black))}
                       </div>
                     )}
-                    <div className='min-w-0'>
+                    <div className='min-w-0 flex-1'>
                       {!hideLiveOptions && selectedTournamentGame.blackTitle && (
-                        <span className='inline-block rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold'>
+                        <span className='mb-1 inline-block rounded-md bg-red-600/80 px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-sm'>
                           {selectedTournamentGame.blackTitle}
                         </span>
                       )}
-                      <p className='text-sm font-semibold leading-tight whitespace-normal break-normal'>
+                      <p className='text-[13px] font-bold leading-tight text-white'>
                         {hideLiveOptions ? selectedBot.name : (
                           <button
                             type='button'
                             onClick={() => openPlayerProfile(selectedTournamentGame.black)}
-                            className='text-left hover:text-cyan-200'
+                            className='text-left transition hover:text-cyan-300'
                             title='View player Elo'
                           >
                             {displayName(selectedTournamentGame.black)}
                           </button>
                         )}
                       </p>
-                      <p className='text-xs text-slate-300'>
-                        {hideLiveOptions ? `BOT ${selectedBot.rating}` : `${federationToFlag(selectedTournamentGame.blackFed)} ${selectedTournamentGame.blackRating || '-'}`}
+                      <p className='mt-0.5 text-[11px] font-medium text-slate-400'>
+                        {hideLiveOptions ? `BOT · ${selectedBot.rating}` : `${federationToFlag(selectedTournamentGame.blackFed)} ${selectedTournamentGame.blackRating || '-'}`}
                       </p>
                       {!hideLiveOptions && selectedTournamentGame.blackEmail ? (
-                        <p className='text-[11px] text-slate-400'>{selectedTournamentGame.blackEmail}</p>
+                        <p className='text-[10px] text-slate-500 truncate'>{selectedTournamentGame.blackEmail}</p>
                       ) : null}
                     </div>
+                    <div className='shrink-0 flex h-7 w-7 items-center justify-center rounded-lg bg-[#111] ring-1 ring-white/10 text-[10px] font-bold text-slate-300'>B</div>
                   </div>
                 </div>
 
-                <div className='my-3 space-y-2'>
+                <div className='my-3 space-y-1.5'>
                   {hideLiveOptions ? (
-                    <div className='rounded bg-[#1f1f1f] px-3 py-2 text-center text-sm text-slate-300'>
+                    <div className='rounded-xl border border-indigo-500/20 bg-indigo-500/8 px-3 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-indigo-300'>
                       Manual Analysis Mode
                     </div>
                   ) : (
                     <>
-                      <div className='rounded bg-[#7fb548] px-2 py-1 text-center text-lg font-semibold'>
-                        {playerOutcome(selectedTournamentGame, 'black')}
+                      <div className='flex items-center justify-between rounded-xl border border-white/10 bg-[#252526] px-3 py-2'>
+                        <span className='text-[11px] font-semibold text-slate-400'>Black</span>
+                        <span className='text-xl font-bold tabular-nums text-white tracking-tight'>{formatClock(shownBlackClock)}</span>
+                        <span className='rounded-lg bg-[#2a3a1a] px-2 py-0.5 text-[10px] font-bold text-emerald-300'>{playerOutcome(selectedTournamentGame, 'black')}</span>
                       </div>
-                      <div className='rounded bg-[#1f1f1f] py-1 text-center text-3xl font-bold'>
-                        {formatClock(shownBlackClock)}
+                      <div className='flex items-center justify-center'>
+                        <div className='h-px flex-1 bg-white/5' />
+                        <span className='mx-2 text-[10px] font-bold text-slate-600'>VS</span>
+                        <div className='h-px flex-1 bg-white/5' />
                       </div>
-                      <div className='rounded bg-[#a1a1a1] px-2 py-1 text-center text-lg font-semibold text-white'>
-                        {playerOutcome(selectedTournamentGame, 'white')}
-                      </div>
-                      <div className='rounded bg-[#f3f3f3] py-1 text-center text-3xl font-bold text-[#111]'>
-                        {formatClock(shownWhiteClock)}
+                      <div className='flex items-center justify-between rounded-xl border border-white/10 bg-[#252526] px-3 py-2'>
+                        <span className='text-[11px] font-semibold text-slate-400'>White</span>
+                        <span className='text-xl font-bold tabular-nums text-white tracking-tight'>{formatClock(shownWhiteClock)}</span>
+                        <span className='rounded-lg bg-[#3a2a0a] px-2 py-0.5 text-[10px] font-bold text-amber-300'>{playerOutcome(selectedTournamentGame, 'white')}</span>
                       </div>
                     </>
                   )}
                 </div>
 
-                <div className='rounded-lg bg-[#2d2d30] p-2'>
-                  <div className='mb-2 flex items-center gap-2'>
+                <div className='relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-[#252526] to-[#1e1e1e] p-3 shadow-lg'>
+                  <div className='pointer-events-none absolute inset-0 bg-gradient-to-br from-amber-400/[0.04] to-transparent' />
+                  <div className='relative flex items-center gap-3'>
                     {!hideLiveOptions && selectedTournamentGame.whitePhoto ? (
-                      <img
-                        src={selectedTournamentGame.whitePhoto}
-                        alt={displayName(selectedTournamentGame.white)}
-                        className='h-20 w-20 rounded object-cover'
-                      />
+                      <div className="relative h-16 w-16 shrink-0">
+                        <div className='absolute inset-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-amber-700/60 to-stone-800 text-base font-bold ring-2 ring-white/10 shadow-md'>
+                          {initials(displayName(selectedTournamentGame.white))}
+                        </div>
+                        <img
+                          src={selectedTournamentGame.whitePhoto}
+                          alt={displayName(selectedTournamentGame.white)}
+                          className='absolute inset-0 h-16 w-16 rounded-xl object-cover ring-2 ring-white/10 shadow-md'
+                          onError={(e) => { e.target.style.display = 'none' }}
+                        />
+                      </div>
                     ) : hideLiveOptions ? (
                       <img
                         src={youAvatar}
                         alt='Your avatar'
-                        className='h-20 w-20 rounded object-cover'
+                        className='shrink-0 h-16 w-16 rounded-xl object-cover ring-2 ring-amber-400/30 shadow-md'
                       />
                     ) : (
-                      <div className='flex h-20 w-20 items-center justify-center rounded bg-[#4a4a4a] text-sm font-semibold'>
+                      <div className='shrink-0 flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-amber-700/60 to-stone-800 text-base font-bold ring-2 ring-white/10 shadow-md'>
                         {initials(displayName(selectedTournamentGame.white))}
                       </div>
                     )}
-                    <div className='min-w-0'>
+                    <div className='min-w-0 flex-1'>
                       {!hideLiveOptions && selectedTournamentGame.whiteTitle && (
-                        <span className='inline-block rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold'>
+                        <span className='mb-1 inline-block rounded-md bg-red-600/80 px-2 py-0.5 text-[10px] font-bold tracking-wide shadow-sm'>
                           {selectedTournamentGame.whiteTitle}
                         </span>
                       )}
-                      <p className='text-sm font-semibold leading-tight whitespace-normal break-normal'>
+                      <p className='text-[13px] font-bold leading-tight text-white'>
                         {hideLiveOptions ? 'You' : (
                           <button
                             type='button'
                             onClick={() => openPlayerProfile(selectedTournamentGame.white)}
-                            className='text-left hover:text-cyan-200'
+                            className='text-left transition hover:text-amber-300'
                             title='View player Elo'
                           >
                             {displayName(selectedTournamentGame.white)}
                           </button>
                         )}
                       </p>
-                      <p className='text-xs text-slate-300'>
-                        {hideLiveOptions ? 'White Side' : `${federationToFlag(selectedTournamentGame.whiteFed)} ${selectedTournamentGame.whiteRating || '-'}`}
+                      <p className='mt-0.5 text-[11px] font-medium text-slate-400'>
+                        {hideLiveOptions ? 'White · You' : `${federationToFlag(selectedTournamentGame.whiteFed)} ${selectedTournamentGame.whiteRating || '-'}`}
                       </p>
                       {!hideLiveOptions && selectedTournamentGame.whiteEmail ? (
-                        <p className='text-[11px] text-slate-400'>{selectedTournamentGame.whiteEmail}</p>
+                        <p className='text-[10px] text-slate-500 truncate'>{selectedTournamentGame.whiteEmail}</p>
                       ) : null}
                     </div>
+                    <div className='shrink-0 flex h-7 w-7 items-center justify-center rounded-lg bg-[#f5f5f5] ring-1 ring-white/20 text-[10px] font-bold text-[#111]'>W</div>
                   </div>
                 </div>
 
@@ -3335,15 +3367,18 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
                 )}
               </aside>
 
-              <div className={`${analysisOnly ? 'overflow-visible' : ''} min-w-0 self-start rounded-xl bg-[#252526] p-2`}>
-                <div className='space-y-2 rounded-lg bg-[#1f1f1f] p-2'>
+              <div className={`${analysisOnly ? 'overflow-visible' : ''} min-w-0 self-start rounded-2xl border border-white/[0.07] bg-gradient-to-b from-[#1e1e1e]/80 to-[#1a1a1a]/80 p-2 backdrop-blur-sm`}>
+                <div className='space-y-2 rounded-xl bg-[#1e1e1e]/60 p-2'>
                   {showEvalBar && (
-                    <div className='rounded-lg bg-[#2b2b2b] px-4 py-3 shadow-sm'>
-                      <div className='flex items-center gap-2 mb-1'>
-                        <div className='w-2 h-2 rounded-full bg-emerald-500 animate-pulse' />
-                        <p className='text-[11px] font-semibold uppercase tracking-wider text-slate-400'>Opening</p>
+                    <div className='relative overflow-hidden rounded-xl border border-emerald-500/15 bg-gradient-to-r from-[#0f1f0f] to-[#111820] px-4 py-3'>
+                      <div className='pointer-events-none absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-cyan-500/5' />
+                      <div className='relative flex items-center gap-2'>
+                        <div className='flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20'>
+                          <div className='h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse' />
+                        </div>
+                        <p className='text-[10px] font-bold uppercase tracking-widest text-emerald-500'>Opening</p>
                       </div>
-                      <p className='text-sm font-semibold text-white'>
+                      <p className='mt-1 text-[13px] font-semibold text-white'>
                         {detectingOpening
                           ? 'Detecting opening...'
                           : (detectedOpening.name
@@ -3453,10 +3488,10 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
                 </div>
               </div>
 
-              <aside className={`${analysisOnly ? 'max-h-[calc(100vh-220px)] overflow-y-auto' : 'h-full overflow-y-scroll'} overflow-x-hidden rounded-xl bg-[#252526] p-3 text-white`}>
+              <aside className={`${analysisOnly ? 'max-h-[calc(100vh-220px)] overflow-y-auto' : 'h-full overflow-y-scroll'} overflow-x-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-b from-[#252526]/90 to-[#1e1e1e]/90 p-3 text-white backdrop-blur-sm`}>
                 {!analysisOnly && (
-                  <div className='mb-2 flex items-center justify-between rounded bg-[#252526] px-3 py-2'>
-                    <p className='truncate text-sm font-semibold'>
+                  <div className='mb-2 flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#252526]/60 px-3 py-2'>
+                    <p className='truncate text-sm font-semibold text-white'>
                       {hideLiveOptions
                         ? (canShowMeVsBotAnalysis ? 'Game Analysis' : 'Me vs Bot')
                         : (selectedTournament?.fullName || selectedTournament?.name || selectedBroadcast?.name || 'Broadcast')}
@@ -3466,23 +3501,28 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
                         href={selectedTournamentGame.url || '#'}
                         target='_blank'
                         rel='noreferrer'
-                        className='text-xs text-slate-300 underline decoration-dotted'
+                        className='text-[11px] text-cyan-400 underline decoration-dotted hover:text-cyan-300'
                       >
-                        Open
+                        Open ↗
                       </a>
                     )}
                   </div>
                 )}
 
-                <div className='mb-2 flex items-start justify-between rounded bg-[#252526] px-3 py-2'>
-                  <p className='truncate text-sm font-semibold'>{hideLiveOptions ? `Me vs ${selectedBot.name} (${selectedBot.rating})` : `SF 18 NNUE · ${powerMode.toUpperCase()} · D${analysisDepth}`}</p>
+                <div className='mb-2 flex items-center justify-between rounded-xl border border-white/[0.07] bg-[#252526]/60 px-3 py-2'>
+                  <div className='flex items-center gap-2'>
+                    <div className='flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15'>
+                      <div className={`h-1.5 w-1.5 rounded-full ${engineReady ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'}`} />
+                    </div>
+                    <p className='truncate text-[12px] font-semibold text-slate-200'>{hideLiveOptions ? `Me vs ${selectedBot.name} (${selectedBot.rating})` : `SF 18 NNUE · ${powerMode.toUpperCase()} · D${analysisDepth}`}</p>
+                  </div>
                   <div className='flex items-center gap-2'>
                     {!analysisOnly && (
                       <button
                         onClick={() => setIsGameViewerOpen(false)}
-                        className='rounded border border-white/15 px-2 py-1 text-xs text-slate-200 transition hover:border-white/30'
+                        className='rounded-lg border border-white/15 px-3 py-1.5 text-[11px] font-semibold text-slate-200 transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-300'
                       >
-                        Back
+                        ✕ Close
                       </button>
                     )}
                   </div>
@@ -3493,8 +3533,8 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
                   </div>
                 ) : null}
                 {analysisOnly && !hideLiveOptions && tournamentGames.length > 0 ? (
-                  <div className='mb-2 rounded border border-white/10 bg-[#1f1f1f] px-3 py-2'>
-                    <p className='mb-1 text-[11px] uppercase tracking-wide text-slate-400'>Your Games</p>
+                  <div className='mb-3 rounded-xl border border-white/10 bg-[#252526]/60 px-3 py-2.5'>
+                    <p className='mb-1.5 text-[10px] font-bold uppercase tracking-widest text-slate-500'>Your Games</p>
                     <select
                       value={String(selectedTournamentGame?.id || '')}
                       onChange={(e) => {
@@ -3503,7 +3543,7 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
                           selectGame(next, false)
                         }
                       }}
-                      className='w-full rounded border border-white/15 bg-[#2d2d30] px-2 py-1 text-xs text-slate-100'
+                      className='w-full rounded-lg border border-white/10 bg-[#0e0e16] px-2 py-1.5 text-[12px] text-slate-100 focus:border-cyan-500/50 focus:outline-none'
                     >
                       {tournamentGames.map((gameRow, index) => (
                         <option key={gameRow.id} value={gameRow.id}>
@@ -3569,30 +3609,39 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
 
                 {canShowMeVsBotAnalysis && (
                 <>
-                {/* Real engine PV lines */}
-                <div className='mb-2 rounded border border-lime-500/50 bg-[#1f1f1f]'>
-                  <div className='flex items-center justify-between border-b border-white/10 px-3 py-2 text-[12px] text-slate-300'>
-                    <span>Engine Lines</span>
-                    <span className='font-semibold text-[#dfe9ff]'>
+                {/* Engine PV lines - premium */}
+                <div className='mb-3 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0e0e16]'>
+                  <div className='flex items-center justify-between border-b border-white/[0.07] bg-gradient-to-r from-[#252526] to-[#1e1e1e] px-3 py-2.5'>
+                    <div className='flex items-center gap-2'>
+                      <div className='h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse' />
+                      <span className='text-[11px] font-bold uppercase tracking-widest text-slate-400'>Engine Lines</span>
+                    </div>
+                    <span className='rounded-lg bg-[#1e2e2e] px-2.5 py-1 text-[13px] font-bold text-cyan-300 tabular-nums'>
                       {evalLabel}
                     </span>
                   </div>
-                  <div className='space-y-1 px-2 py-2 text-[12px]'>
+                  <div className='space-y-1 p-2 text-[12px]'>
                     {displayPvLines.length > 0 ? displayPvLines.map((line, i) => {
-                      const lineColors = ['text-emerald-300', 'text-sky-300', 'text-slate-400']
+                      const lineAccents = [
+                        { num: 'text-emerald-400', bg: 'bg-emerald-500/8 border-emerald-500/20' },
+                        { num: 'text-sky-400',     bg: 'bg-sky-500/8 border-sky-500/20' },
+                        { num: 'text-slate-400',   bg: 'bg-white/[0.04] border-white/10' },
+                      ]
                       if (!line) return null
                       const pvText = hideLiveOptions && meVsBotGameState.isOver
                         ? String(line.pv || '')
-                        : String(line.pv || '').split(' ').slice(0, 5).join(' ')
+                        : String(line.pv || '').split(' ').slice(0, 6).join(' ')
+                      const accent = lineAccents[i] || lineAccents[2]
                       return (
-                        <div key={i} className='flex items-start gap-1.5 rounded bg-[#2d2d30] px-2 py-1'>
-                          <span className={`font-bold ${lineColors[i] || 'text-slate-300'}`}>{i + 1}.</span>
-                          <span className='font-semibold text-slate-100'>{line.evalLabel}</span>
-                          <span className='break-all text-slate-400'>{pvText}</span>
+                        <div key={i} className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 ${accent.bg}`}>
+                          <span className={`shrink-0 text-[11px] font-black ${accent.num}`}>{i + 1}</span>
+                          <span className='shrink-0 text-[12px] font-bold text-white'>{line.evalLabel}</span>
+                          <span className='truncate text-[11px] text-slate-400 font-mono'>{pvText}</span>
                         </div>
                       )
                     }) : (
-                      <div className='rounded bg-[#2d2d30] px-2 py-1 text-slate-300'>
+                      <div className='flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-2 text-[12px] text-slate-400'>
+                        <div className='h-3 w-3 animate-spin rounded-full border-2 border-slate-600 border-t-cyan-400' />
                         {bestMove ? `Best: ${bestMove}` : 'Analyzing…'}
                       </div>
                     )}
@@ -3623,26 +3672,30 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
                   </div>
                 )}
 
-                <div className='mb-2 rounded border border-white/10 bg-[#1f1f1f] p-2'>
-                  <div className='mb-2 grid grid-cols-3 items-center gap-2'>
-                    <div className='rounded border border-white/15 bg-[#2d2d30] px-2 py-1 text-center'>
-                      <p className='text-[11px] text-slate-300'>White</p>
-                      <p className='text-2xl font-bold text-white'>{qualityRows.length ? whiteAccuracy : '-'}</p>
-                      <p className='text-xs font-semibold text-slate-300'>Accuracy</p>
+                <div className='mb-3 overflow-hidden rounded-xl border border-white/[0.08] bg-[#0e0e16]'>
+                  <div className='grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-white/[0.07] bg-gradient-to-r from-[#252526] to-[#1e1e1e] px-3 py-2.5'>
+                    <div className='rounded-xl border border-white/10 bg-[#252526] px-3 py-2 text-center'>
+                      <p className='text-[9px] font-bold uppercase tracking-widest text-amber-500/80'>White</p>
+                      <p className='text-2xl font-black tabular-nums text-white'>{qualityRows.length ? whiteAccuracy : '—'}</p>
+                      <p className='text-[9px] font-semibold uppercase tracking-wider text-slate-500'>Accuracy</p>
                     </div>
-                    <div className='text-center text-xl text-slate-500'>*</div>
-                    <div className='rounded border border-white/15 bg-[#2d2d30] px-2 py-1 text-center'>
-                      <p className='text-[11px] text-slate-300'>Black</p>
-                      <p className='text-2xl font-bold text-white'>{qualityRows.length ? blackAccuracy : '-'}</p>
-                      <p className='text-xs font-semibold text-slate-300'>Accuracy</p>
+                    <div className='flex flex-col items-center gap-0.5'>
+                      <div className='h-4 w-px bg-white/10' />
+                      <span className='text-[9px] font-black text-slate-600'>VS</span>
+                      <div className='h-4 w-px bg-white/10' />
+                    </div>
+                    <div className='rounded-xl border border-white/10 bg-[#252526] px-3 py-2 text-center'>
+                      <p className='text-[9px] font-bold uppercase tracking-widest text-slate-400/80'>Black</p>
+                      <p className='text-2xl font-black tabular-nums text-white'>{qualityRows.length ? blackAccuracy : '—'}</p>
+                      <p className='text-[9px] font-semibold uppercase tracking-wider text-slate-500'>Accuracy</p>
                     </div>
                   </div>
 
-                  {/* ── Evaluation Graph ─────────────────────────────── */}
-                  <div className='rounded border border-white/10 bg-[#1a1a1a] p-1'>
+                  {/* ── Evaluation Graph ── */}
+                  <div className='bg-[#1a1a1a] p-1.5'>
                     {qualityGraphData.points.length === 0 ? (
-                      <div className='flex h-20 items-center justify-center'>
-                        <span className='text-[11px] text-slate-500'>
+                      <div className='flex h-20 items-center justify-center rounded-lg border border-dashed border-white/10'>
+                        <span className='text-[11px] text-slate-600'>
                           {qualityRunning ? `Analyzing ${qualityProgress.current}/${qualityProgress.total}…` : 'Run analysis to see eval graph'}
                         </span>
                       </div>
@@ -3745,92 +3798,78 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
                     )}
                   </div>
 
-                  <div className='mt-2 flex items-center justify-between gap-2'>
+                  <div className='mt-3 flex items-center justify-between gap-2 border-t border-white/[0.07] pt-3'>
                     <button
                       onClick={runQualityReview}
                       disabled={!engineReady || qualityRunning || !(tournamentReplay.moves || []).length}
-                      className='rounded border border-white/15 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:border-cyan-300/60 hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-50'
+                      className='flex items-center gap-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-[11px] font-bold text-cyan-300 transition hover:border-cyan-400/50 hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-40'
                     >
-                      {qualityRunning ? `Analyzing ${qualityProgress.current}/${qualityProgress.total}` : 'Analyze Move Quality'}
+                      {qualityRunning ? (
+                        <><div className='h-2.5 w-2.5 animate-spin rounded-full border-2 border-cyan-700 border-t-cyan-300' />{`${qualityProgress.current}/${qualityProgress.total}`}</>
+                      ) : '⚡ Analyze'}
                     </button>
-                    <div className='flex flex-wrap items-center gap-1.5 text-[10px]'>
+                    <div className='flex flex-wrap items-center gap-1 text-[9px] text-slate-500'>
                       {FEEDBACK_ROWS.map(({ label }) => {
                         const meta = getMeta(label)
                         return (
                           <span key={`legend-${label}`} className='flex items-center gap-0.5'>
-                            <span className='inline-block h-2 w-2 rounded-full' style={{ backgroundColor: meta.color || '#94a3b8' }} />
+                            <span className='inline-block h-1.5 w-1.5 rounded-full' style={{ backgroundColor: meta.color || '#94a3b8' }} />
                             {label}
                           </span>
                         )
                       })}
-                      <span className='flex items-center gap-0.5'>
-                        <span className='inline-block h-2 w-2 rounded-full bg-[#60a5fa]' />Current
-                      </span>
                     </div>
                   </div>
-
-                  {qualityError ? <p className='mt-1 text-[11px] text-red-300'>{qualityError}</p> : null}
+                  {qualityError ? <p className='mt-1 text-[11px] text-red-400'>{qualityError}</p> : null}
                 </div>
 
-                <div className='mb-2 max-h-[43vh] overflow-y-scroll overflow-x-hidden rounded bg-[#1f1f1f]'>
-                  <table className='w-full text-left text-[13px]'>
-                    <thead className='sticky top-0 bg-[#2d2d30] text-slate-300'>
+                <div className='mb-3 max-h-[40vh] overflow-y-auto overflow-x-hidden rounded-xl border border-white/[0.07] bg-[#1e1e1e]'>
+                  <table className='w-full text-left text-[12px]'>
+                    <thead className='sticky top-0 z-10 bg-gradient-to-r from-[#252526] to-[#1e1e1e] text-slate-500'>
                       <tr>
-                        <th className='px-2 py-2'>#</th>
-                        <th className='px-2 py-2'>White</th>
-                        <th className='px-2 py-2'>Eval</th>
-                        <th className='px-2 py-2'>Black</th>
-                        <th className='px-2 py-2'>Eval</th>
+                        <th className='px-2 py-2 text-[9px] font-bold uppercase tracking-widest'>#</th>
+                        <th className='px-2 py-2 text-[9px] font-bold uppercase tracking-widest text-amber-500/70'>White</th>
+                        <th className='px-2 py-2 text-[9px] font-bold uppercase tracking-widest'>Eval</th>
+                        <th className='px-2 py-2 text-[9px] font-bold uppercase tracking-widest text-slate-400/70'>Black</th>
+                        <th className='px-2 py-2 text-[9px] font-bold uppercase tracking-widest'>Eval</th>
                       </tr>
                     </thead>
                     <tbody>
                       {moveRows.length === 0 ? (
-                        <tr>
-                          <td className='px-2 py-3 text-slate-400' colSpan={5}>
-                            Status: {normalizeStatusLabel(selectedTournamentGame.status)} | Opening: {selectedTournamentGame.opening || '-'}
-                          </td>
-                        </tr>
+                        <tr><td className='px-3 py-4 text-[11px] text-slate-600' colSpan={5}>
+                          {normalizeStatusLabel(selectedTournamentGame.status)} · {selectedTournamentGame.opening || 'No opening'}
+                        </td></tr>
                       ) : (
-                        moveRows.map((row, idx) => (
-                          <tr key={row.move} className='border-t border-white/5'>
-                            <td className='px-2 py-1 text-slate-500'>{row.move}</td>
-                            <td className='px-2 py-1 text-slate-100'>
-                              <button
-                                type='button'
-                                onClick={() => jumpToPly(row.move * 2 - 1)}
-                                className={`rounded px-1 py-0.5 transition ${activeReplayPly === row.move * 2 - 1 ? 'bg-cyan-500/20 text-cyan-200' : 'text-slate-100 hover:bg-white/10'}`}
-                                title={`Jump to ${row.white}`}
-                              >
+                        moveRows.map((row) => (
+                          <tr key={row.move} className='border-t border-white/[0.04] transition hover:bg-white/[0.03]'>
+                            <td className='px-2 py-1.5 text-[10px] font-bold text-slate-600'>{row.move}</td>
+                            <td className='px-2 py-1'>
+                              <button type='button' onClick={() => jumpToPly(row.move * 2 - 1)}
+                                className={`rounded-md px-1.5 py-0.5 text-[12px] font-semibold transition ${activeReplayPly === row.move * 2 - 1 ? 'bg-amber-500/20 text-amber-200' : 'text-slate-200 hover:bg-white/8'}`}>
                                 {row.white}
                               </button>
                             </td>
-                            <td className='px-2 py-1 text-slate-400'>
-                              {formatWhiteEvalLabel(qualityByPly.get(row.move * 2 - 1)?.evalAfter, '-')}
+                            <td className='px-1 py-1 text-[10px] text-slate-500'>
+                              {formatWhiteEvalLabel(qualityByPly.get(row.move * 2 - 1)?.evalAfter, '')}
                               {qualityByPly.get(row.move * 2 - 1)?.classification ? (
-                                <span className={`ml-1 inline-block rounded border px-1 py-0.5 text-[10px] ${qualityBadgeClass(qualityByPly.get(row.move * 2 - 1).classification)}`}>
-                                  {qualityByPly.get(row.move * 2 - 1).classification}
+                                <span className={`ml-1 inline-block rounded px-1 py-0.5 text-[9px] font-bold border ${qualityBadgeClass(qualityByPly.get(row.move * 2 - 1).classification)}`}>
+                                  {getMeta(qualityByPly.get(row.move * 2 - 1).classification).emoji}
                                 </span>
                               ) : null}
                             </td>
-                            <td className='px-2 py-1 text-slate-100'>
+                            <td className='px-2 py-1'>
                               {row.black ? (
-                                <button
-                                  type='button'
-                                  onClick={() => jumpToPly(row.move * 2)}
-                                  className={`rounded px-1 py-0.5 transition ${activeReplayPly === row.move * 2 ? 'bg-cyan-500/20 text-cyan-200' : 'text-slate-100 hover:bg-white/10'}`}
-                                  title={`Jump to ${row.black}`}
-                                >
+                                <button type='button' onClick={() => jumpToPly(row.move * 2)}
+                                  className={`rounded-md px-1.5 py-0.5 text-[12px] font-semibold transition ${activeReplayPly === row.move * 2 ? 'bg-slate-500/20 text-slate-100' : 'text-slate-300 hover:bg-white/8'}`}>
                                   {row.black}
                                 </button>
-                              ) : (
-                                '-'
-                              )}
+                              ) : <span className='text-slate-700'>—</span>}
                             </td>
-                            <td className='px-2 py-1 text-slate-400'>
-                              {formatWhiteEvalLabel(qualityByPly.get(row.move * 2)?.evalAfter, '-')}
+                            <td className='px-1 py-1 text-[10px] text-slate-500'>
+                              {formatWhiteEvalLabel(qualityByPly.get(row.move * 2)?.evalAfter, '')}
                               {qualityByPly.get(row.move * 2)?.classification ? (
-                                <span className={`ml-1 inline-block rounded border px-1 py-0.5 text-[10px] ${qualityBadgeClass(qualityByPly.get(row.move * 2).classification)}`}>
-                                  {qualityByPly.get(row.move * 2).classification}
+                                <span className={`ml-1 inline-block rounded px-1 py-0.5 text-[9px] font-bold border ${qualityBadgeClass(qualityByPly.get(row.move * 2).classification)}`}>
+                                  {getMeta(qualityByPly.get(row.move * 2).classification).emoji}
                                 </span>
                               ) : null}
                             </td>
@@ -3843,146 +3882,77 @@ function LichessWatch({ socket, analysisOnly = false, hideLiveOptions = false })
                 </>
                 )}
 
-                <div className='rounded bg-[#252526] px-2 py-2'>
-                  <div className='mb-2 flex items-center justify-between text-xs text-slate-300'>
-                    <span className='flex items-center gap-2'>
-                      <span>Stockfish {engineReady ? '(ready)' : '(loading...)'}</span>
-                      <span
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${nnueEnabled ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}
-                      >
-                        NNUE {nnueEnabled ? 'ON' : 'OFF'}
-                      </span>
-                      {!hideLiveOptions && (
-                        <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${followLive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}`}
-                        >
-                          LIVE {followLive ? 'ON' : 'OFF'}
-                        </span>
-                      )}
-                    </span>
-                    <span>{botThinking ? 'Bot thinking...' : isAnalyzing ? 'Analyzing...' : 'Idle'}</span>
+                <div className='rounded-2xl border border-white/[0.07] bg-gradient-to-b from-[#252526] to-[#1e1e1e] px-3 py-3'>
+                  {/* Status row */}
+                  <div className='mb-3 flex items-center justify-between'>
+                    <div className='flex items-center gap-2'>
+                      <div className={`h-2 w-2 rounded-full ${engineReady ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]' : 'bg-amber-400 animate-pulse'}`} />
+                      <span className='text-[11px] font-semibold text-slate-300'>Stockfish {engineReady ? 'Ready' : 'Loading…'}</span>
+                      <span className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${nnueEnabled ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25' : 'bg-amber-500/15 text-amber-400 border border-amber-500/25'}`}>NNUE {nnueEnabled ? 'ON' : 'OFF'}</span>
+                      {!hideLiveOptions && <span className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ${followLive ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25' : 'bg-slate-500/15 text-slate-400 border border-slate-500/25'}`}>LIVE {followLive ? 'ON' : 'OFF'}</span>}
+                    </div>
+                    <span className='text-[10px] text-slate-600'>{botThinking ? 'Thinking…' : isAnalyzing ? 'Analyzing…' : 'Idle'}</span>
                   </div>
-                  <div className='mb-2'>
-                    <button
-                      onClick={() => setNnueMode(!nnueMode)}
-                      className='rounded border border-white/15 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:border-cyan-300/60 hover:bg-cyan-400/10'
-                    >
-                      Turn NNUE {nnueMode ? 'OFF' : 'ON'}
+
+                  {/* Nav buttons */}
+                  <div className='mb-3 flex gap-2'>
+                    <button onClick={goPrev} disabled={hideLiveOptions ? clampedLearnPly <= 0 : clampedTournamentPly <= 0}
+                      className='flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] py-2 text-[12px] font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-30'>
+                      ← Prev
+                    </button>
+                    <button onClick={goNext} disabled={hideLiveOptions ? clampedLearnPly >= learnMaxPly : clampedTournamentPly >= tournamentMaxPly}
+                      className='flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] py-2 text-[12px] font-semibold text-slate-300 transition hover:border-white/20 hover:bg-white/8 disabled:cursor-not-allowed disabled:opacity-30'>
+                      Next →
                     </button>
                   </div>
-                  <div className='mb-2'>
-                    <label className='text-[11px] text-slate-300'>
-                      NNUE Model
-                      <select
-                        value={selectedNnueNetworkId}
-                        onChange={(e) => setNnueNetwork(e.target.value)}
-                        className='mt-1 w-full rounded border border-white/15 bg-[#1e1e1e] px-2 py-1 text-[11px] text-slate-100'
-                      >
-                        {nnueNetworks.map((network) => (
-                          <option key={network.id} value={network.id}>{network.label}</option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-                  {hideLiveOptions && (
-                    <div className='mb-2'>
-                      <label className='text-[11px] text-slate-300'>
-                        Bot Difficulty
-                        <select
-                          value={selectedBotId}
-                          onChange={(e) => setSelectedBotId(e.target.value)}
-                          className='mt-1 w-full rounded border border-white/15 bg-[#1e1e1e] px-2 py-1 text-[11px] text-slate-100'
-                        >
-                          {LEARN_BOTS.map((bot) => (
-                            <option key={bot.id} value={bot.id}>{bot.name} ({bot.rating})</option>
-                          ))}
-                        </select>
-                      </label>
-                      <button
-                        onClick={startNewBotGame}
-                        className='mt-2 rounded border border-white/15 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:border-cyan-300/60 hover:bg-cyan-400/10'
-                      >
-                        New Bot Game
-                      </button>
-                    </div>
-                  )}
-                  <div className='mb-2 grid grid-cols-2 gap-2'>
-                    <label className='text-[11px] text-slate-300'>
-                      Engine Power
-                      <select
-                        value={powerMode}
-                        onChange={(e) => setPowerMode(e.target.value)}
-                        className='mt-1 w-full rounded border border-white/15 bg-[#1e1e1e] px-2 py-1 text-[11px] text-slate-100'
-                      >
+
+                  <p className='mb-3 text-center text-[11px] text-slate-600'>Ply <span className='font-bold text-slate-400'>{hideLiveOptions ? clampedLearnPly : clampedTournamentPly}</span> / {hideLiveOptions ? learnMaxPly : tournamentMaxPly}</p>
+
+                  {/* Settings grid */}
+                  <div className='grid grid-cols-2 gap-2 mb-2'>
+                    <div>
+                      <p className='mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-600'>Engine Power</p>
+                      <select value={powerMode} onChange={(e) => setPowerMode(e.target.value)}
+                        className='w-full rounded-lg border border-white/10 bg-[#1e1e1e] px-2 py-1.5 text-[11px] text-slate-200 focus:border-cyan-500/40 focus:outline-none'>
                         <option value='balanced'>Balanced</option>
                         <option value='strong'>Strong</option>
                         <option value='max'>Max</option>
                       </select>
-                    </label>
-                    <label className='text-[11px] text-slate-300'>
-                      Depth
-                      <select
-                        value={analysisDepth}
-                        onChange={(e) => setAnalysisDepth(Number(e.target.value))}
-                        className='mt-1 w-full rounded border border-white/15 bg-[#1e1e1e] px-2 py-1 text-[11px] text-slate-100'
-                      >
-                        <option value={14}>14</option>
-                        <option value={16}>16</option>
-                        <option value={18}>18</option>
-                        <option value={20}>20</option>
-                        <option value={22}>22</option>
-                      </select>
-                    </label>
-                  </div>
-                  <p className='mb-2 text-[10px] text-slate-400'>
-                    Strongest mode: NNUE ON + Power Max + Depth 20-22.
-                  </p>
-                  {!analysisOnly && !hideLiveOptions && (
-                    <div className='mb-2'>
-                      <button
-                        onClick={() => setFollowLive((prev) => {
-                          const next = !prev
-                          if (next) {
-                            setTournamentPly(9999)
-                          }
-                          return next
-                        })}
-                        className='rounded border border-white/15 px-2 py-1 text-[11px] font-semibold text-slate-200 transition hover:border-cyan-300/60 hover:bg-cyan-400/10'
-                      >
-                        Turn Live {followLive ? 'OFF' : 'ON'}
-                      </button>
                     </div>
-                  )}
-                  <div className='mb-2 flex flex-wrap gap-2'>
-                    <button
-                      onClick={goPrev}
-                      disabled={hideLiveOptions ? clampedLearnPly <= 0 : clampedTournamentPly <= 0}
-                      className='rounded border border-white/15 px-3 py-1 text-xs text-slate-200 disabled:cursor-not-allowed disabled:opacity-50'
-                    >
-                      Previous Move
-                    </button>
-                    <button
-                      onClick={goNext}
-                      disabled={hideLiveOptions ? clampedLearnPly >= learnMaxPly : clampedTournamentPly >= tournamentMaxPly}
-                      className='rounded border border-white/15 px-3 py-1 text-xs text-slate-200 disabled:cursor-not-allowed disabled:opacity-50'
-                    >
-                      Next Move
-                    </button>
+                    <div>
+                      <p className='mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-600'>Depth</p>
+                      <select value={analysisDepth} onChange={(e) => setAnalysisDepth(Number(e.target.value))}
+                        className='w-full rounded-lg border border-white/10 bg-[#1e1e1e] px-2 py-1.5 text-[11px] text-slate-200 focus:border-cyan-500/40 focus:outline-none'>
+                        <option value={14}>14</option><option value={16}>16</option><option value={18}>18</option><option value={20}>20</option><option value={22}>22</option>
+                      </select>
+                    </div>
                   </div>
-                  <p className='text-xs text-slate-300'>
-                    Ply: <span className='font-semibold text-white'>{hideLiveOptions ? clampedLearnPly : clampedTournamentPly}</span> / {hideLiveOptions ? learnMaxPly : tournamentMaxPly}
-                  </p>
-                  {!hideLiveOptions && (
-                    <p className='text-xs text-slate-400'>
-                      Clock mode: <span className='text-slate-200'>{followLive ? 'Live side-to-move' : 'Replay paused'}</span>
-                    </p>
+
+                  <div className='mb-2'>
+                    <p className='mb-1 text-[9px] font-bold uppercase tracking-widest text-slate-600'>NNUE Model</p>
+                    <select value={selectedNnueNetworkId} onChange={(e) => setNnueNetwork(e.target.value)}
+                      className='w-full rounded-lg border border-white/10 bg-[#1e1e1e] px-2 py-1.5 text-[11px] text-slate-200 focus:border-cyan-500/40 focus:outline-none'>
+                      {nnueNetworks.map((network) => (<option key={network.id} value={network.id}>{network.label}</option>))}
+                    </select>
+                  </div>
+
+                  <div className='mt-2 flex flex-wrap gap-2'>
+                    <button onClick={() => setNnueMode(!nnueMode)}
+                      className='rounded-lg border border-white/10 px-2.5 py-1.5 text-[10px] font-semibold text-slate-300 transition hover:border-cyan-500/30 hover:text-cyan-300'>
+                      NNUE {nnueMode ? 'OFF' : 'ON'}
+                    </button>
+                    {!analysisOnly && !hideLiveOptions && (
+                      <button onClick={() => setFollowLive((prev) => { const n = !prev; if (n) setTournamentPly(9999); return n })}
+                        className='rounded-lg border border-white/10 px-2.5 py-1.5 text-[10px] font-semibold text-slate-300 transition hover:border-emerald-500/30 hover:text-emerald-300'>
+                        Live {followLive ? 'OFF' : 'ON'}
+                      </button>
+                    )}
+                  </div>
+
+                  {!hideLiveOptions && tournamentLastUpdated && (
+                    <p className='mt-2 text-[9px] text-slate-700'>Updated: {tournamentLastUpdated.toLocaleTimeString()}</p>
                   )}
-                  {!hideLiveOptions && (
-                    <p className='text-xs text-slate-400'>
-                      Feed updated: <span className='text-slate-200'>{tournamentLastUpdated ? tournamentLastUpdated.toLocaleTimeString() : '-'}</span>
-                    </p>
-                  )}
-                  {engineError ? <p className='mt-1 text-[11px] text-red-300'>{engineError}</p> : null}
+                  {engineError ? <p className='mt-2 text-[10px] text-red-400'>{engineError}</p> : null}
                 </div>
               </aside>
             </div>

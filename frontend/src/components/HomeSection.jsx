@@ -33,43 +33,79 @@ const timeline = [
 const chessStyleSections = [
   {
     id: 'play',
-    title: 'Play',
-    subtitle: 'Jump into live matches and challenges.',
-    cta: 'Play Now',
-    accent: 'from-emerald-500/30 to-lime-400/10',
-    badge: 'Live'
+    title: 'Play Online',
+    subtitle: 'Rated games and live challenges against players worldwide.',
+    cta: 'Play now',
+    colorClass: 'text-[#4ade80]',
+    icon: (
+      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="14" rx="2" ry="2"></rect>
+        <path d="M8 21h8"></path>
+        <path d="M12 17v4"></path>
+        <path d="m8 10 2-2 2 2 4-4"></path>
+      </svg>
+    )
   },
   {
     id: 'puzzles',
-    title: 'Puzzles',
-    subtitle: 'Solve tactical shots and improve accuracy.',
-    cta: 'Solve Puzzles',
-    accent: 'from-amber-500/30 to-orange-400/10',
-    badge: 'Daily'
+    title: 'Solve Puzzles',
+    subtitle: 'Practice tactical shots without rating stakes.',
+    cta: 'Solve now',
+    colorClass: 'text-[#60a5fa]',
+    icon: (
+      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+    )
   },
   {
     id: 'learn',
-    title: 'Learn',
-    subtitle: 'Train openings, endgames, and strategy.',
-    cta: 'Start Learning',
-    accent: 'from-cyan-500/30 to-sky-400/10',
-    badge: 'Courses'
+    title: 'Learn & Study',
+    subtitle: 'Train openings, endgames, and strategy modules.',
+    cta: 'Start learning',
+    colorClass: 'text-[#c084fc]',
+    icon: (
+      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+    )
   },
   {
     id: 'watch',
-    title: 'Watch',
-    subtitle: 'Follow top games, events, and streams.',
-    cta: 'Watch Games',
-    accent: 'from-rose-500/30 to-pink-400/10',
-    badge: 'Broadcast'
+    title: 'Watch Events',
+    subtitle: 'Follow top arena-style Swiss pairings and streams.',
+    cta: 'Watch now',
+    colorClass: 'text-[#fbbf24]',
+    icon: (
+      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+        <path d="M4 22h16"></path>
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+      </svg>
+    )
   },
   {
     id: 'review',
     title: 'Game Review',
-    subtitle: 'Analyze mistakes and find improvements.',
-    cta: 'Open Review',
-    accent: 'from-violet-500/30 to-indigo-400/10',
-    badge: 'Engine'
+    subtitle: 'Analyze mistakes and find engine improvements.',
+    cta: 'Review now',
+    colorClass: 'text-[#2dd4bf]',
+    icon: (
+      <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+        <path d="m8 11 2-2 2 2 4-4"></path>
+      </svg>
+    )
   }
 ]
 
@@ -181,6 +217,7 @@ function HomeSection({ onPlayClick, onPuzzlesClick, onWatchClick, onLearnClick }
     RATING_TYPES.find((type) => type.key === activeRatingsType)?.label || 'Classical'
   const activeRatings = ratingsByType[activeRatingsType] || []
   const activeUpdatedAt = ratingsUpdatedAtByType[activeRatingsType] || '-'
+  const selectedRatings = selectedPlayer ? (playerDetails?.ratings || null) : null
 
   const closePlayerDetails = () => {
     setSelectedPlayer(null)
@@ -281,143 +318,81 @@ function HomeSection({ onPlayClick, onPuzzlesClick, onWatchClick, onLearnClick }
     <>
       <div className='chess-page grid grid-cols-1 gap-4 xl:grid-cols-12'>
         <section className='space-y-4 xl:col-span-8'>
-        <div className='chess-hero'>
-          <div className='bg-[radial-gradient(circle_at_0%_0%,rgba(134,239,172,0.23),transparent_45%),radial-gradient(circle_at_95%_5%,rgba(56,189,248,0.2),transparent_45%)] p-5 md:p-6'>
-            <p className='text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300'>Home</p>
-            <h1 className='mt-2 text-3xl font-bold tracking-tight text-white md:text-4xl'>Chess Dashboard</h1>
-            <p className='mt-2 max-w-2xl text-sm text-slate-300'>
-              Everything in one place, like Chess.com: quick play, puzzle training, guided learning, live watch, and full game review.
-            </p>
-            <div className='mt-4 flex flex-wrap gap-2'>
-              <button
-                onClick={onPlayClick}
-                className='chess-btn-primary'
-              >
-                Play Game
-              </button>
-              <button
-                onClick={onPuzzlesClick}
-                className='chess-btn-secondary hover:border-amber-300/60 hover:bg-amber-400/10'
-              >
-                Solve Puzzle
-              </button>
-              <button
-                onClick={openReview}
-                className='chess-btn-secondary hover:border-violet-300/60 hover:bg-violet-400/10'
-              >
-                Analyze Game
-              </button>
+        <div className='chess-hero relative overflow-hidden'>
+          <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_90%_at_0%_0%,rgba(52,211,153,0.18),transparent_55%)]' />
+          <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_40%_60%_at_100%_100%,rgba(56,189,248,0.12),transparent_60%)]' />
+          <div className='relative p-6 md:p-8'>
+            <p className='text-[11px] font-bold uppercase tracking-[0.2em] text-emerald-400 mb-1'>Home</p>
+            <h1 className='text-3xl font-extrabold tracking-tight text-white md:text-4xl'>Chess Dashboard</h1>
+            <p className='mt-2 max-w-2xl text-sm text-slate-400'>Quick play, puzzle training, guided learning, live watch, and full game review — all in one place.</p>
+            <div className='mt-5 flex flex-wrap items-center gap-3'>
+              <button onClick={onPlayClick} className='chess-btn-primary'>▶ Play Game</button>
+              <button onClick={onPuzzlesClick} className='chess-btn-secondary'>⚡ Solve Puzzle</button>
+              <button onClick={openReview} className='chess-btn-secondary'>🔍 Analyze Game</button>
+              <span className='flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold text-emerald-300 ml-1'>
+                <span className='h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse' />~37.3k online
+              </span>
             </div>
           </div>
         </div>
 
-        <div className='chess-card'>
-          <div className='mb-3 flex items-center justify-between'>
-            <h2 className='text-lg font-semibold text-white'>Core Sections</h2>
-            <span className='text-xs text-slate-400'>Play • Puzzle • Learn • Watch • Review</span>
-          </div>
-          <div className='grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3'>
-            {chessStyleSections.map((section) => {
-              const handler = section.id === 'play'
-                ? onPlayClick
-                : section.id === 'puzzles'
-                  ? onPuzzlesClick
-                  : section.id === 'learn'
-                    ? onLearnClick
-                    : section.id === 'watch'
-                      ? onWatchClick
-                      : openReview
-
-              return (
-                <button
-                  key={section.id}
-                  onClick={handler}
-                  className='group rounded-xl border border-white/10 bg-[#2d2d30] p-4 text-left transition hover:border-cyan-300/60 hover:bg-[#343439]'
-                >
-                  <div className={`mb-2 rounded-md bg-gradient-to-r p-[1px] ${section.accent}`}>
-                    <div className='rounded-md bg-[#232326] px-2 py-1'>
-                      <span className='text-[10px] font-semibold uppercase tracking-wide text-slate-300'>{section.badge}</span>
+          <div className='chess-card'>
+            <div className='mb-5 flex items-center justify-between'>
+              <h2 className='font-serif text-xl font-bold text-white'>Core Sections</h2>
+              <span className='text-[11px] text-slate-400'>Play · Puzzle · Learn · Watch · Review</span>
+            </div>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
+              {chessStyleSections.map((section) => {
+                const handler = section.id === 'play' ? onPlayClick : section.id === 'puzzles' ? onPuzzlesClick : section.id === 'learn' ? onLearnClick : section.id === 'watch' ? onWatchClick : openReview
+                return (
+                  <button key={section.id} onClick={handler}
+                    className='group flex h-full flex-col items-start rounded-2xl border border-white/[0.04] bg-[#1e1e1e] p-6 text-left transition-all duration-300 hover:-translate-y-1 hover:border-white/10 hover:bg-[#252526] hover:shadow-2xl'>
+                    <div className={`mb-4 ${section.colorClass} transition-transform duration-300 group-hover:scale-110`}>
+                      {section.icon}
                     </div>
-                  </div>
-                  <p className='text-sm font-semibold text-white'>{section.title}</p>
-                  <p className='mt-1 text-xs text-slate-400'>{section.subtitle}</p>
-                  <span className='mt-3 inline-flex rounded-md border border-white/15 px-2.5 py-1 text-[11px] text-cyan-200 transition group-hover:border-cyan-300/60'>
-                    {section.cta}
-                  </span>
-                </button>
-              )
-            })}
+                    <div className='flex-1'>
+                      <h3 className='mb-1 font-serif text-lg font-bold text-white'>{section.title}</h3>
+                      <p className='text-[13px] leading-relaxed text-slate-400'>{section.subtitle}</p>
+                    </div>
+                    <div className={`mt-6 flex items-center text-sm font-bold ${section.colorClass}`}>
+                      {section.cta} <span className='ml-1.5 text-lg leading-none transition-transform group-hover:translate-x-1'>›</span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
           </div>
-        </div>
 
         <div className='chess-card'>
-          <p className='text-xs uppercase tracking-[0.14em] text-slate-400'>Quick Access</p>
-          <h3 className='mt-1 text-xl font-bold text-white'>Play Faster, Improve Daily</h3>
-          <p className='mt-2 max-w-2xl text-sm text-slate-300'>
-            Use this shortcut row for the most common actions from your chess workflow.
-          </p>
-
-          <div className='mt-4 grid grid-cols-2 gap-2 md:grid-cols-4'>
-            <button
-              onClick={onPlayClick}
-              className='chess-btn-primary'
-            >
-              Create Game
-            </button>
-            <button
-              onClick={onPlayClick}
-              className='chess-btn-secondary'
-            >
-              Challenge Friend
-            </button>
-            <button
-              onClick={onLearnClick}
-              className='chess-btn-secondary'
-            >
-              Study Board
-            </button>
-            <button
-              onClick={onPuzzlesClick}
-              className='chess-btn-secondary'
-            >
-              Daily Puzzle
-            </button>
+          <div className='mb-5 flex items-center justify-between'>
+            <h2 className='text-lg font-bold text-white'>Quick Pairing Pools</h2>
+            <span className='flex items-center gap-1.5 text-[11px] text-slate-400'>
+              <span className='h-1.5 w-1.5 animate-pulse rounded-full bg-[#6ea13c]' />~{totalPlayers}k online
+            </span>
           </div>
-        </div>
-
-        <div className='rounded-2xl border border-white/10 bg-[#252526]/85 p-5 backdrop-blur'>
-          <div className='mb-3 flex items-center justify-between'>
-            <h2 className='text-lg font-semibold text-white'>Quick Pairing Pools</h2>
-            <span className='text-xs text-slate-400'>~{totalPlayers}k players online</span>
-          </div>
-          <div className='grid grid-cols-2 gap-2 md:grid-cols-3'>
+          <div className='grid grid-cols-2 gap-3 md:grid-cols-3'>
             {quickPairings.map((pool) => (
-              <button
-                key={pool.id}
-                onClick={onPlayClick}
-                className='rounded-xl border border-white/10 bg-[#2d2d30] px-3 py-2 text-left transition hover:border-emerald-300/50 hover:bg-[#35353a]'
-              >
-                <p className='text-sm font-semibold text-white'>{pool.id}</p>
-                <p className='text-xs text-slate-400'>{pool.label} • {pool.players}</p>
+              <button key={pool.id} onClick={onPlayClick}
+                className='card-compact group text-left transition hover:-translate-y-1 hover:border-[rgba(110,161,60,0.5)]'>
+                <p className='text-sm font-bold text-white transition-colors group-hover:text-[#6ea13c]'>{pool.id}</p>
+                <p className='mt-1 text-[11px] text-slate-400'>{pool.label} · {pool.players}</p>
               </button>
             ))}
           </div>
         </div>
 
         <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
-          <div className='rounded-2xl border border-white/10 bg-[#252526]/85 p-5 backdrop-blur'>
-            <h3 className='mb-3 text-lg font-semibold text-white'>Featured Events</h3>
-            <div className='space-y-2'>
+          <div className='chess-card'>
+            <h3 className='mb-4 text-base font-bold text-white'>Featured Events</h3>
+            <div className='space-y-3'>
               {spotlightEvents.map((event) => (
-                <div key={event.title} className='flex items-center justify-between rounded-lg bg-[#2d2d30] px-3 py-2'>
+                <div key={event.title} className='card-compact flex items-center justify-between transition hover:border-[rgba(255,255,255,0.1)]'>
                   <div>
                     <p className='text-sm font-semibold text-slate-100'>{event.title}</p>
-                    <p className='text-xs text-slate-400'>{event.subtitle}</p>
+                    <p className='mt-1 text-[11px] text-slate-400'>{event.subtitle}</p>
                   </div>
-                  <button
-                    onClick={onWatchClick}
-                    className='rounded-md border border-white/15 px-2.5 py-1 text-xs text-slate-200 transition hover:border-cyan-300/60'
-                  >
+                  <button onClick={onWatchClick}
+                    className='rounded-lg border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.04)] px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-[rgba(255,255,255,0.08)]'>
                     {event.action}
                   </button>
                 </div>
@@ -425,13 +400,16 @@ function HomeSection({ onPlayClick, onPuzzlesClick, onWatchClick, onLearnClick }
             </div>
           </div>
 
-          <div className='rounded-2xl border border-white/10 bg-[#252526]/85 p-5 backdrop-blur'>
-            <h3 className='mb-3 text-lg font-semibold text-white'>Timeline</h3>
-            <div className='space-y-2'>
+          <div className='chess-card'>
+            <h3 className='mb-4 text-base font-bold text-white'>Timeline</h3>
+            <div className='space-y-3'>
               {timeline.map((entry) => (
-                <div key={entry.id} className='rounded-lg bg-[#2d2d30] px-3 py-2'>
-                  <p className='text-sm text-slate-200'>{entry.text}</p>
-                  <p className='text-[11px] text-slate-500'>{entry.time}</p>
+                <div key={entry.id} className='card-compact flex items-start gap-3'>
+                  <div className='mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#f3c24b]' />
+                  <div className='flex-1'>
+                    <p className='text-sm text-slate-200'>{entry.text}</p>
+                    <span className='badge-pill mt-1 inline-block px-2 py-0.5 text-[10px] text-slate-400'>{entry.time}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -440,22 +418,22 @@ function HomeSection({ onPlayClick, onPuzzlesClick, onWatchClick, onLearnClick }
         </section>
 
         <aside className='space-y-4 xl:col-span-4'>
-          <section className='rounded-2xl border border-white/10 bg-[#252526]/85 p-5 backdrop-blur'>
-          <div className='mb-3 flex items-center justify-between'>
-            <h3 className='text-lg font-semibold text-white'>Live FIDE Ratings Top 30</h3>
-            <span className='rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300'>Live</span>
+          <section className='hero-accent p-5'>
+          <div className='mb-4 flex items-center justify-between'>
+            <h3 className='text-lg font-bold text-white'>Live FIDE Ratings</h3>
+            <span className='rounded bg-[#6ea13c]/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#6ea13c]'>Live</span>
           </div>
 
-          <div className='mb-3 flex flex-wrap gap-2'>
+          <div className='mb-4 flex flex-wrap gap-2'>
             {RATING_TYPES.map((type) => (
               <button
                 key={type.key}
                 type='button'
                 onClick={() => setActiveRatingsType(type.key)}
-                className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                   activeRatingsType === type.key
-                    ? 'bg-cyan-500/20 text-cyan-200 ring-1 ring-cyan-400/40'
-                    : 'bg-[#2d2d30] text-slate-300 hover:bg-[#35353a]'
+                    ? 'bg-[#f3c24b] text-[#0f1113] shadow-[0_0_15px_rgba(243,194,75,0.3)]'
+                    : 'bg-[rgba(255,255,255,0.04)] text-slate-300 hover:bg-[rgba(255,255,255,0.08)]'
                 }`}
               >
                 {type.label}
@@ -463,52 +441,46 @@ function HomeSection({ onPlayClick, onPuzzlesClick, onWatchClick, onLearnClick }
             ))}
           </div>
 
-          <p className='mb-3 text-xs text-slate-400'>
+          <p className='mb-1 text-xs text-slate-400'>
             {activeRatingLabel} updated: <span className='text-slate-200'>{activeUpdatedAt}</span>
           </p>
-
-          <p className='mb-3 text-xs text-slate-400'>
-            Showing <span className='text-slate-200'>{activeRatings.length}</span> of up to 30 players.
+          <p className='mb-4 text-xs text-slate-400'>
+            Showing <span className='text-slate-200'>{activeRatings.length}</span> of top 30 players.
           </p>
 
-          {ratingsLoading && <p className='text-sm text-slate-400'>Loading live ratings...</p>}
-          {!ratingsLoading && ratingsError && <p className='text-sm text-red-300'>{ratingsError}</p>}
-
+          {ratingsLoading && <p className='text-sm text-[#f3c24b]'>Loading live ratings...</p>}
+          {!ratingsLoading && ratingsError && <p className='text-sm text-red-400'>{ratingsError}</p>}
           {!ratingsLoading && !ratingsError && !activeRatings.length && (
-            <p className='text-sm text-slate-400'>No live ratings available right now.</p>
+            <p className='mt-4 text-sm text-slate-400'>No live ratings available right now.</p>
           )}
 
           {!ratingsLoading && !ratingsError && (
-            <div className='max-h-[34rem] space-y-2 overflow-auto pr-1'>
+            <div className='mt-4 max-h-[28rem] space-y-2 overflow-auto pr-2'>
               {activeRatings.map((player) => (
-                <div key={`${activeRatingsType}-${player.rank}-${player.name}`} className='grid grid-cols-[2rem_1fr_auto] items-center gap-2 rounded-lg bg-[#2d2d30] px-3 py-2'>
-                  <span className='text-xs font-semibold text-slate-400'>#{player.rank}</span>
-                  <div className='min-w-0'>
+                <div key={`${activeRatingsType}-${player.rank}-${player.name}`} className='card-compact group flex items-center gap-3 transition hover:-translate-y-0.5 hover:border-[rgba(243,194,75,0.4)]'>
+                  <span className='w-5 text-center text-[10px] font-bold text-slate-500 group-hover:text-[#f3c24b]'>#{player.rank}</span>
+                  <div className='min-w-0 flex-1'>
                     <button
                       type='button'
                       onClick={() => openPlayerDetails(player)}
-                      className='w-full truncate text-left text-sm font-semibold text-slate-100 hover:text-cyan-200'
+                      className='flex items-center gap-2 truncate text-left text-sm font-bold text-slate-100 transition-colors group-hover:text-[#f3c24b]'
                       title={player.playerSlug ? 'Show player details' : 'Player profile unavailable'}
                     >
-                      <span
-                        className={`mr-2 inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-                          player.isLive
-                            ? 'bg-emerald-500/20 text-emerald-300'
-                            : 'bg-slate-500/20 text-slate-300'
-                        }`}
-                        title={player.isLive && player.liveUrl ? player.liveUrl : 'No live game detected'}
-                      >
-                        {player.isLive ? 'Live' : 'Idle'}
-                      </span>
                       {formatPlayerName(player.name)}
+                      {player.isLive && (
+                        <span className='relative flex h-1.5 w-1.5 shrink-0' title={player.liveUrl || 'Live'}>
+                          <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-[#6ea13c] opacity-75'></span>
+                          <span className='relative inline-flex h-1.5 w-1.5 rounded-full bg-[#6ea13c]'></span>
+                        </span>
+                      )}
                     </button>
-                    <p className='text-[11px] text-slate-400'>{player.federation || '-'}</p>
+                    <p className='mt-0.5 text-[10px] uppercase tracking-widest text-slate-500'>{player.federation || '-'}</p>
                   </div>
                   <div className='text-right'>
-                    <p className='text-sm font-bold text-white'>
+                    <p className='text-sm font-black text-white'>
                       {Number.isFinite(Number(player.rating)) ? Number(player.rating).toFixed(1) : '-'}
                     </p>
-                    <p className={`text-[11px] ${getDeltaClass(player.change)}`}>
+                    <p className={`text-[10px] font-bold ${getDeltaClass(player.change)}`}>
                       {formatDelta(player.change)}
                     </p>
                   </div>
@@ -518,32 +490,41 @@ function HomeSection({ onPlayClick, onPuzzlesClick, onWatchClick, onLearnClick }
           )}
           </section>
 
-          <section className='rounded-2xl border border-white/10 bg-[#252526]/85 p-5 backdrop-blur'>
-            <h3 className='mb-2 text-lg font-semibold text-white'>Today\'s Puzzle</h3>
-            <p className='text-sm text-slate-300'>White to move and win material in 3.</p>
-            <button
-              onClick={onPuzzlesClick}
-              className='mt-3 w-full rounded-lg bg-gradient-to-r from-cyan-500 to-sky-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110'
-            >
-              Solve Now
-            </button>
+          <section className='hero-accent p-5'>
+            <h3 className='mb-4 text-base font-bold text-white'>Daily Puzzle</h3>
+            <div className='relative overflow-hidden rounded-xl border border-[rgba(243,194,75,0.2)] bg-[rgba(28,28,30,0.4)] p-4'>
+              <div className='pointer-events-none absolute -right-4 -top-4 text-[#f3c24b] opacity-10'>
+                <svg className='h-24 w-24' viewBox='0 0 24 24' fill='currentColor'><path d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/></svg>
+              </div>
+              <p className='relative text-sm font-bold text-white'>White to move</p>
+              <p className='relative mb-4 mt-1 text-[11px] text-slate-400'>Win material in 3 moves.</p>
+              <button
+                onClick={onPuzzlesClick}
+                className='chess-btn-primary relative w-full shadow-lg shadow-[#f3c24b]/20 hover:-translate-y-1'
+              >
+                Solve Now
+              </button>
+            </div>
           </section>
 
-          <section className='rounded-2xl border border-white/10 bg-[#252526]/85 p-5 backdrop-blur'>
-            <h3 className='mb-2 text-lg font-semibold text-white'>Openings To Train</h3>
-            <ul className='space-y-2 text-sm text-slate-300'>
-              <li className='rounded-lg bg-[#2d2d30] px-3 py-2'>Sicilian Defense: Najdorf</li>
-              <li className='rounded-lg bg-[#2d2d30] px-3 py-2'>Queen\'s Gambit Declined</li>
-              <li className='rounded-lg bg-[#2d2d30] px-3 py-2'>Ruy Lopez: Berlin Endgame</li>
+          <section className='chess-card'>
+            <h3 className='mb-4 text-base font-bold text-white'>Openings To Train</h3>
+            <ul className='space-y-2'>
+              {['Sicilian Defense: Najdorf', 'Queen\'s Gambit Declined', 'Ruy Lopez: Berlin Endgame'].map((opening) => (
+                <li key={opening} className='card-compact group flex cursor-pointer items-center justify-between px-4 py-3 transition hover:border-[#6ea13c]/30 hover:bg-[rgba(110,161,60,0.05)]'>
+                  <span className='text-xs font-bold text-slate-300 transition-colors group-hover:text-[#6ea13c]'>{opening}</span>
+                  <span className='text-[#6ea13c]/50 group-hover:text-[#6ea13c]'>→</span>
+                </li>
+              ))}
             </ul>
           </section>
 
-          <section className='rounded-2xl border border-white/10 bg-[#252526]/85 p-5 backdrop-blur'>
-            <h3 className='mb-2 text-lg font-semibold text-white'>Community</h3>
-            <p className='text-sm text-slate-300'>Forums, teams, and study groups are active now.</p>
+          <section className='chess-card'>
+            <h3 className='mb-3 text-base font-bold text-white'>Community</h3>
+            <p className='mb-4 text-xs text-slate-400'>Forums, teams, and study groups are active now. Join the conversation.</p>
             <button
               onClick={onWatchClick}
-              className='mt-3 w-full rounded-lg border border-white/15 px-4 py-2 text-sm text-slate-200 transition hover:border-cyan-300/60 hover:bg-cyan-400/10'
+              className='chess-btn-secondary w-full hover:-translate-y-1'
             >
               Open Live Watch
             </button>
@@ -552,230 +533,197 @@ function HomeSection({ onPlayClick, onPuzzlesClick, onWatchClick, onLearnClick }
       </div>
 
       {selectedPlayer && (
-        <div className='fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 py-6'>
-          <div className='max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-white/10 bg-[#252526] p-5 shadow-2xl'>
-            <div className='mb-4 flex items-start justify-between gap-3'>
-              <div>
-                <p className='text-xs uppercase tracking-[0.14em] text-slate-400'>Player Details</p>
-                <h3 className='text-xl font-bold text-white'>
-                  {playerDetails?.name || formatPlayerName(selectedPlayer.name)}
-                </h3>
+        <div className='fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-[#0b0b0c]/90 px-4 py-8 backdrop-blur-md'>
+          <div className='chess-hero relative w-full max-w-5xl overflow-hidden shadow-2xl'>
+            <div className='relative overflow-hidden border-b border-[rgba(255,255,255,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent)] px-6 py-6'>
+              <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_100%_at_0%_0%,rgba(243,194,75,0.12),transparent_50%)]' />
+              <div className='relative flex items-start justify-between gap-4'>
+                <div className='flex flex-col gap-4 sm:flex-row sm:items-center'>
+                  <div className='shrink-0'>
+                    {playerDetails?.photoUrl && !playerImageFailed ? (
+                      <div className='card-compact relative overflow-hidden p-1 shadow-lg'>
+                        <img
+                          src={playerDetails.photoUrl}
+                          alt={playerDetails.name || 'Player'}
+                          className='h-24 w-24 rounded-xl object-cover sm:h-28 sm:w-28'
+                          onError={() => setPlayerImageFailed(true)}
+                        />
+                      </div>
+                    ) : (
+                      <div className='card-compact flex h-24 w-24 items-center justify-center bg-gradient-to-br from-[rgba(255,255,255,0.05)] to-transparent shadow-lg sm:h-28 sm:w-28'>
+                        <span className='text-3xl font-black text-slate-600 sm:text-4xl'>
+                          {String(playerDetails?.name || selectedPlayer.name || '?')
+                            .split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('') || '?'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className='min-w-0'>
+                    <p className='mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-[#f3c24b]'>Player Profile</p>
+                    <h3 className='truncate text-2xl font-extrabold text-white sm:text-3xl'>
+                      {playerDetails?.name || formatPlayerName(selectedPlayer.name)}
+                    </h3>
+                    <p className='mt-1 text-sm text-slate-400'>{playerDetails?.country || selectedPlayer.federation || '-'}</p>
+
+                    <div className='mt-4 grid grid-cols-3 gap-2 sm:max-w-xl'>
+                      {[
+                        { label: 'Bullet', value: selectedRatings?.bullet ?? playerDetails?.liveRating ?? '-' },
+                        { label: 'Blitz', value: selectedRatings?.blitz ?? playerDetails?.blitz?.rating ?? playerDetails?.fideRating ?? '-' },
+                        { label: 'Rapid', value: selectedRatings?.rapid ?? playerDetails?.rapid?.rating ?? playerDetails?.fideRating ?? '-' }
+                      ].map((item) => (
+                        <div key={item.label} className='rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-center'>
+                          <p className='text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500'>{item.label}</p>
+                          <p className='mt-1 text-lg font-black text-white'>{item.value ?? '-'}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type='button'
+                  onClick={closePlayerDetails}
+                  className='rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-2 text-slate-400 transition hover:bg-[rgba(255,255,255,0.08)] hover:text-white'
+                >
+                  <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2'><path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12'/></svg>
+                </button>
               </div>
-              <button
-                type='button'
-                onClick={closePlayerDetails}
-                className='rounded-lg border border-white/15 px-3 py-1.5 text-sm text-slate-200 hover:border-cyan-300/60'
-              >
-                Close
-              </button>
             </div>
 
-            {playerDetailsLoading && <p className='text-sm text-slate-300'>Loading player details...</p>}
-            {!playerDetailsLoading && playerDetailsError && <p className='text-sm text-red-300'>{playerDetailsError}</p>}
+            <div className='max-h-[75vh] overflow-y-auto p-6'>
+              {playerDetailsLoading && <p className='text-sm text-[#f3c24b]'>Loading player details...</p>}
+              {!playerDetailsLoading && playerDetailsError && <p className='rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300'>{playerDetailsError}</p>}
 
-            {!playerDetailsLoading && !playerDetailsError && playerDetails && (
-              <div className='space-y-4'>
-                <div className='flex flex-col gap-4 sm:flex-row'>
-                  {playerDetails.photoUrl && !playerImageFailed && (
-                    <img
-                      src={playerDetails.photoUrl}
-                      alt={playerDetails.name || 'Player'}
-                      className='h-28 w-28 rounded-xl border border-white/10 object-cover'
-                      onError={() => setPlayerImageFailed(true)}
-                    />
-                  )}
-                  {(!playerDetails.photoUrl || playerImageFailed) && (
-                    <div className='grid h-28 w-28 place-items-center rounded-xl border border-white/10 bg-gradient-to-br from-[#3a3a3f] to-[#2b2b2f] text-2xl font-bold text-slate-100'>
-                      {String(playerDetails.name || selectedPlayer.name || '?')
-                        .split(' ')
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((part) => part[0]?.toUpperCase() || '')
-                        .join('') || '?'}
+              {!playerDetailsLoading && !playerDetailsError && playerDetails && (
+                <div className='space-y-6'>
+                  <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+                    <div className='card-compact px-4 py-3'>
+                      <p className='mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500'>Country</p>
+                      <p className='truncate text-lg font-black text-white'>{playerDetails.country || '-'}</p>
                     </div>
-                  )}
-                  <div className='grid flex-1 grid-cols-2 gap-2 text-sm'>
-                    <div className='rounded-lg bg-[#2d2d30] px-3 py-2 text-slate-200'>Live: <span className='font-semibold text-white'>{playerDetails.liveRating ?? '-'}</span></div>
-                    <div className='rounded-lg bg-[#2d2d30] px-3 py-2 text-slate-200'>FIDE: <span className='font-semibold text-white'>{playerDetails.fideRating ?? '-'}</span></div>
-                    <div className='rounded-lg bg-[#2d2d30] px-3 py-2 text-slate-200'>World Rank: <span className='font-semibold text-white'>#{playerDetails.worldRank ?? '-'}</span></div>
-                    <div className='rounded-lg bg-[#2d2d30] px-3 py-2 text-slate-200'>Country Rank: <span className='font-semibold text-white'>#{playerDetails.countryRank ?? '-'}</span></div>
-                  </div>
-                </div>
-
-                <div className='grid grid-cols-1 gap-2 text-sm text-slate-300 sm:grid-cols-2'>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Country: <span className='text-slate-100'>{playerDetails.country || '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Age: <span className='text-slate-100'>{playerDetails.age || '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Born: <span className='text-slate-100'>{playerDetails.born || '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>FIDE ID: <span className='text-slate-100'>{playerDetails.fideId || '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2 sm:col-span-2'>Location: <span className='text-slate-100'>{playerDetails.location || '-'}</span></p>
-                </div>
-
-                <div className='grid grid-cols-2 gap-2 text-sm text-slate-300 sm:grid-cols-4'>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Games: <span className='text-slate-100'>{playerDetails.totalGames ?? '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Wins: <span className='text-slate-100'>{playerDetails.wins ?? '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Losses: <span className='text-slate-100'>{playerDetails.losses ?? '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Draws: <span className='text-slate-100'>{playerDetails.draws ?? '-'}</span></p>
-                </div>
-
-                <div className='grid grid-cols-2 gap-2 text-sm text-slate-300 sm:grid-cols-4'>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Score: <span className='text-slate-100'>{playerDetails.totalScore || '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>12m Perf: <span className='text-slate-100'>{playerDetails.performance12m ?? '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Wins %: <span className='text-slate-100'>{playerDetails.winsPct || '-'}</span></p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Loss %: <span className='text-slate-100'>{playerDetails.lossesPct || '-'}</span></p>
-                </div>
-
-                <div className='grid grid-cols-1 gap-2 text-sm text-slate-300 sm:grid-cols-2'>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Rapid: <span className='text-slate-100'>{playerDetails.rapid?.rating ?? '-'}</span> (#{playerDetails.rapid?.worldRank ?? '-'})</p>
-                  <p className='rounded-lg bg-[#2d2d30] px-3 py-2'>Blitz: <span className='text-slate-100'>{playerDetails.blitz?.rating ?? '-'}</span> (#{playerDetails.blitz?.worldRank ?? '-'})</p>
-                </div>
-
-                <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
-                  <div className='rounded-lg bg-[#2d2d30] p-3'>
-                    <p className='mb-2 text-xs uppercase tracking-[0.12em] text-slate-400'>Top Openings As White</p>
-                    <div className='space-y-1 text-sm text-slate-200'>
-                      {(playerDetails.openings?.white || []).map((line) => (
-                        <p key={`white-${line}`}>{line}</p>
-                      ))}
-                      {!playerDetails.openings?.white?.length && <p className='text-slate-400'>No opening data</p>}
+                    <div className='card-compact px-4 py-3'>
+                      <p className='mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500'>Age</p>
+                      <p className='text-lg font-black text-white'>{playerDetails.age || '-'}</p>
+                    </div>
+                    <div className='card-compact px-4 py-3'>
+                      <p className='mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500'>Born</p>
+                      <p className='text-lg font-black text-white'>{playerDetails.born || '-'}</p>
+                    </div>
+                    <div className='card-compact px-4 py-3'>
+                      <p className='mb-1 text-[10px] font-bold uppercase tracking-widest text-slate-500'>FIDE ID</p>
+                      <p className='truncate text-lg font-black text-white'>{playerDetails.fideId || '-'}</p>
                     </div>
                   </div>
 
-                  <div className='rounded-lg bg-[#2d2d30] p-3'>
-                    <p className='mb-2 text-xs uppercase tracking-[0.12em] text-slate-400'>Top Openings As Black</p>
-                    <div className='space-y-1 text-sm text-slate-200'>
-                      {(playerDetails.openings?.black || []).map((line) => (
-                        <p key={`black-${line}`}>{line}</p>
-                      ))}
-                      {!playerDetails.openings?.black?.length && <p className='text-slate-400'>No opening data</p>}
-                    </div>
+                  <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
+                    <div className='card-compact px-4 py-3 text-center'><p className='text-2xl font-black text-white'>{playerDetails.totalGames ?? '-'}</p><p className='mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500'>Games</p></div>
+                    <div className='card-compact px-4 py-3 text-center'><p className='text-2xl font-black text-[#6ea13c]'>{playerDetails.wins ?? '-'}</p><p className='mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500'>Wins</p></div>
+                    <div className='card-compact px-4 py-3 text-center'><p className='text-2xl font-black text-red-400'>{playerDetails.losses ?? '-'}</p><p className='mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500'>Losses</p></div>
+                    <div className='card-compact px-4 py-3 text-center'><p className='text-2xl font-black text-slate-400'>{playerDetails.draws ?? '-'}</p><p className='mt-1 text-[10px] font-bold uppercase tracking-widest text-slate-500'>Draws</p></div>
                   </div>
-                </div>
 
-                <div className='rounded-lg bg-[#2d2d30] p-3'>
-                  <p className='mb-2 text-xs uppercase tracking-[0.12em] text-slate-400'>Rating History</p>
-                  <div className='max-h-56 overflow-auto'>
-                    <table className='w-full text-left text-sm text-slate-200'>
-                      <thead className='sticky top-0 bg-[#2d2d30] text-xs text-slate-400'>
-                        <tr>
-                          <th className='px-2 py-1'>Date</th>
-                          <th className='px-2 py-1'>Rating</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(playerDetails.ratingHistory || []).map((entry) => (
-                          <tr key={`${entry.date}-${entry.rating}`} className='border-t border-white/5'>
-                            <td className='px-2 py-1'>{entry.date}</td>
-                            <td className='px-2 py-1 font-semibold text-white'>{entry.rating}</td>
-                          </tr>
+                  <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+                    <div className='card-compact p-4'>
+                      <p className='mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500'>Top Openings (White)</p>
+                      <div className='space-y-2'>
+                        {(playerDetails.openings?.white || []).map((line) => (
+                          <div key={`white-${line}`} className='badge-pill px-3 py-2 text-sm font-medium text-slate-200'>{line}</div>
                         ))}
-                      </tbody>
-                    </table>
-                    {!playerDetails.ratingHistory?.length && <p className='text-sm text-slate-400'>No history available</p>}
-                  </div>
-                </div>
-
-                <div className='space-y-3 rounded-lg bg-[#2d2d30] p-3'>
-                  <p className='text-xs uppercase tracking-[0.12em] text-slate-400'>Profile Sections</p>
-                  {[
-                    ['Championships', playerDetails.sections?.championships],
-                    ['Ratings', playerDetails.sections?.ratings],
-                    ['Titles', playerDetails.sections?.titles],
-                    ['Classical Tournaments', playerDetails.sections?.classicalTournaments],
-                    ['Team Events', playerDetails.sections?.teamEvents]
-                  ].map(([title, content]) => (
-                    <div key={title} className='space-y-1'>
-                      <h4 className='text-sm font-semibold text-white'>{title}</h4>
-                      {toParagraphs(content).map((para) => (
-                        <p key={`${title}-${para.slice(0, 30)}`} className='text-sm text-slate-300'>
-                          {para}
-                        </p>
-                      ))}
-                      {!content && <p className='text-sm text-slate-500'>No data</p>}
+                        {!playerDetails.openings?.white?.length && <p className='text-sm text-slate-500'>No opening data</p>}
+                      </div>
                     </div>
-                  ))}
-                </div>
-
-                <div className='flex flex-wrap gap-2 text-xs'>
-                  <a href={playerDetails.sourceUrl} target='_blank' rel='noreferrer' className='rounded-md border border-white/15 px-2.5 py-1 text-slate-200 hover:border-cyan-300/60'>2700chess Profile</a>
-                  {playerDetails.gamesArchiveUrl && <a href={playerDetails.gamesArchiveUrl} target='_blank' rel='noreferrer' className='rounded-md border border-white/15 px-2.5 py-1 text-slate-200 hover:border-cyan-300/60'>Games Archive</a>}
-                  {playerDetails.links?.fide && <a href={playerDetails.links.fide} target='_blank' rel='noreferrer' className='rounded-md border border-white/15 px-2.5 py-1 text-slate-200 hover:border-cyan-300/60'>FIDE</a>}
-                  {playerDetails.links?.wikipedia && <a href={playerDetails.links.wikipedia} target='_blank' rel='noreferrer' className='rounded-md border border-white/15 px-2.5 py-1 text-slate-200 hover:border-cyan-300/60'>Wikipedia</a>}
-                </div>
-
-                <section className='rounded-lg bg-[#2d2d30] p-3'>
-                  <div className='mb-2 flex items-center justify-between'>
-                    <p className='text-xs uppercase tracking-[0.12em] text-slate-400'>Player Games</p>
-                    <span className='text-xs text-slate-500'>Page {playerGamesPage}</span>
+                    <div className='card-compact p-4'>
+                      <p className='mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500'>Top Openings (Black)</p>
+                      <div className='space-y-2'>
+                        {(playerDetails.openings?.black || []).map((line) => (
+                          <div key={`black-${line}`} className='badge-pill px-3 py-2 text-sm font-medium text-slate-200'>{line}</div>
+                        ))}
+                        {!playerDetails.openings?.black?.length && <p className='text-sm text-slate-500'>No opening data</p>}
+                      </div>
+                    </div>
                   </div>
 
-                  {playerGamesLoading && !playerGames.length && <p className='text-sm text-slate-400'>Loading games...</p>}
-                  {playerGamesError && <p className='mb-2 text-sm text-red-300'>{playerGamesError}</p>}
-
-                  {!playerGamesLoading && !playerGames.length && !playerGamesError && (
-                    <p className='text-sm text-slate-400'>No games found for this player.</p>
-                  )}
-
-                  {!!playerGames.length && (
-                    <div className='max-h-64 overflow-auto rounded border border-white/5'>
-                      <table className='w-full text-left text-sm text-slate-200'>
-                        <thead className='sticky top-0 bg-[#2d2d30] text-xs text-slate-400'>
+                  <div className='card-compact p-4'>
+                    <p className='mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500'>Rating History</p>
+                    <div className='max-h-48 overflow-auto'>
+                      <table className='w-full text-left text-sm'>
+                        <thead className='sticky top-0 bg-[rgba(255,255,255,0.02)] text-[10px] font-bold uppercase tracking-widest text-slate-500 backdrop-blur-md'>
                           <tr>
-                            <th className='px-2 py-1'>Date</th>
-                            <th className='px-2 py-1'>Pairing</th>
-                            <th className='px-2 py-1'>Result</th>
-                            <th className='px-2 py-1'>Site</th>
-                            <th className='px-2 py-1'>Action</th>
+                            <th className='pb-2 pl-2'>Date</th>
+                            <th className='pr-2 text-right pb-2'>Rating</th>
                           </tr>
                         </thead>
-                        <tbody>
-                          {playerGames.map((game) => (
-                            <tr key={`${game.gamePath}-${game.index}`} className='border-t border-white/5'>
-                              <td className='px-2 py-1 text-xs text-slate-300'>{game.date || '-'}</td>
-                              <td className='px-2 py-1 text-xs'>
-                                <p className='text-slate-100'>{game.white} vs {game.black}</p>
-                                <p className='text-slate-500'>#{game.index} • {game.moves ?? '-'} moves</p>
-                              </td>
-                              <td className='px-2 py-1 text-xs text-slate-200'>{game.result || '-'}</td>
-                              <td className='px-2 py-1 text-xs text-slate-300'>{game.site || '-'}</td>
-                              <td className='px-2 py-1'>
-                                <button
-                                  type='button'
-                                  onClick={() => analyzePlayerGame(game)}
-                                  disabled={analyzingGamePath === game.gamePath}
-                                  className='rounded border border-cyan-400/40 px-2 py-1 text-[11px] text-cyan-200 hover:bg-cyan-400/10 disabled:opacity-50'
-                                >
-                                  {analyzingGamePath === game.gamePath ? 'Loading...' : 'Analyze'}
-                                </button>
-                              </td>
+                        <tbody className='divide-y divide-[rgba(255,255,255,0.04)]'>
+                          {(playerDetails.ratingHistory || []).map((entry) => (
+                            <tr key={`${entry.date}-${entry.rating}`} className='hover:bg-[rgba(255,255,255,0.02)]'>
+                              <td className='pl-2 py-2 text-slate-300'>{entry.date}</td>
+                              <td className='pr-2 py-2 text-right font-black text-[#f3c24b]'>{entry.rating}</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+                      {!playerDetails.ratingHistory?.length && <p className='text-sm text-slate-500'>No history available</p>}
                     </div>
-                  )}
-
-                  <div className='mt-2 flex items-center justify-end gap-2'>
-                    <button
-                      type='button'
-                      onClick={() => selectedPlayer?.playerSlug && loadPlayerGames(selectedPlayer.playerSlug, playerGamesPage + 1)}
-                      disabled={!playerGamesHasMore || playerGamesLoading}
-                      className='rounded border border-white/15 px-2.5 py-1 text-xs text-slate-200 hover:border-cyan-300/60 disabled:opacity-50'
-                    >
-                      {playerGamesLoading ? 'Loading...' : playerGamesHasMore ? 'Load More' : 'No More Games'}
-                    </button>
                   </div>
-                </section>
 
-                {playerDetails.rawMarkdown && (
-                  <details className='rounded-lg bg-[#2d2d30] p-3'>
-                    <summary className='cursor-pointer text-sm font-semibold text-white'>Full Profile Text</summary>
-                    <pre className='mt-2 max-h-64 overflow-auto whitespace-pre-wrap text-xs text-slate-300'>
-                      {playerDetails.rawMarkdown}
-                    </pre>
-                  </details>
-                )}
-              </div>
-            )}
+                  <div className='card-compact p-4'>
+                    <div className='mb-4 flex items-center justify-between'>
+                      <p className='text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500'>Player Games</p>
+                      <span className='badge-pill text-[10px] font-semibold text-slate-400'>Page {playerGamesPage}</span>
+                    </div>
+                    {playerGamesLoading && !playerGames.length && <p className='text-sm text-slate-400'>Loading games...</p>}
+                    {playerGamesError && <p className='mb-3 text-sm text-red-400'>{playerGamesError}</p>}
+                    {!playerGamesLoading && !playerGames.length && !playerGamesError && <p className='text-sm text-slate-500'>No games found for this player.</p>}
+
+                    {!!playerGames.length && (
+                      <div className='max-h-64 overflow-auto rounded-lg border border-[rgba(255,255,255,0.04)] bg-[rgba(0,0,0,0.2)]'>
+                        <table className='w-full text-left'>
+                          <thead className='sticky top-0 border-b border-[rgba(255,255,255,0.06)] bg-[rgba(28,28,30,0.9)] text-[10px] font-bold uppercase tracking-widest text-slate-500 shadow-sm backdrop-blur-md'>
+                            <tr>
+                              <th className='p-3'>Pairing</th>
+                              <th className='p-3'>Result</th>
+                              <th className='p-3 text-right'>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className='divide-y divide-[rgba(255,255,255,0.04)]'>
+                            {playerGames.map((game) => (
+                              <tr key={`${game.gamePath}-${game.index}`} className='transition hover:bg-[rgba(255,255,255,0.02)]'>
+                                <td className='p-3'>
+                                  <p className='text-sm font-semibold text-white'>{game.white} <span className='font-normal text-slate-500'>vs</span> {game.black}</p>
+                                  <p className='mt-1 text-[10px] text-slate-400'>{game.date || '-'} • {game.site || '-'} • {game.moves ?? '-'} moves</p>
+                                </td>
+                                <td className='p-3 text-sm font-bold text-slate-300'>{game.result || '-'}</td>
+                                <td className='p-3 text-right'>
+                                  <button
+                                    type='button'
+                                    onClick={() => analyzePlayerGame(game)}
+                                    disabled={analyzingGamePath === game.gamePath}
+                                    className='rounded-lg border border-[#f3c24b]/30 bg-[#f3c24b]/10 px-3 py-1.5 text-[11px] font-bold text-[#f3c24b] transition hover:bg-[#f3c24b]/20 disabled:opacity-50'
+                                  >
+                                    {analyzingGamePath === game.gamePath ? 'Loading...' : 'Analyze'}
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    <div className='mt-4 flex justify-end'>
+                      <button
+                        type='button'
+                        onClick={() => selectedPlayer?.playerSlug && loadPlayerGames(selectedPlayer.playerSlug, playerGamesPage + 1)}
+                        disabled={!playerGamesHasMore || playerGamesLoading}
+                        className='chess-btn-secondary text-[11px] font-bold text-slate-300 hover:text-white disabled:opacity-50'
+                      >
+                        {playerGamesLoading ? 'Loading...' : playerGamesHasMore ? 'Load More Games' : 'End of History'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -1,10 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  --bg-900: #0f1113;
+  --bg-800: #151617;
+  --card-bg: rgba(28,28,30,0.72);
+  --muted: #9ca3af;
+  --accent: #f3c24b;
+  --accent-2: #6ea13c;
+  --glass: rgba(255,255,255,0.04);
+  --radius-lg: 18px;
   color-scheme: dark;
 }
 
@@ -15,8 +23,20 @@
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #262421;
-  color: #e5e7eb;
+  background: linear-gradient(180deg, var(--bg-900) 0%, #0b0b0c 60%);
+  color: #e6eef6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: #ffffff;
+  margin: 0;
+}
+
+.muted {
+  color: var(--muted);
 }
 
 #root {
@@ -56,18 +76,101 @@ body {
   }
 
   .chess-card {
-    @apply rounded-2xl border border-[#3a3a38] bg-[#262522]/90 p-5 backdrop-blur;
+    @apply rounded-2xl p-5 backdrop-blur transition-all duration-300;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+
+  .chess-card:hover {
+    box-shadow: 0 15px 40px rgba(2,6,23,0.8), inset 0 1px 0 rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.08);
   }
 
   .chess-hero {
-    @apply overflow-hidden rounded-2xl border border-[#3a3a38] bg-[#1f1f1d] shadow-[0_18px_42px_rgba(0,0,0,0.35)];
+    @apply overflow-hidden transition-all duration-500;
+    border-radius: calc(var(--radius-lg) + 4px);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    box-shadow: 0 30px 80px rgba(2,6,23,0.7);
   }
 
   .chess-btn-primary {
-    @apply rounded-lg bg-gradient-to-r from-[#80b64a] to-[#6ea13c] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110;
+    @apply rounded-lg px-5 py-3 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:brightness-110 active:translate-y-0 active:scale-95;
+    background: linear-gradient(90deg, #ffd970 0%, #f3c24b 40%, #d9a32a 100%);
+    color: #0b0b0c;
+    box-shadow: 0 8px 30px rgba(243,194,75,0.18), inset 0 -2px 0 rgba(0,0,0,0.12);
+    border-radius: 12px;
   }
 
   .chess-btn-secondary {
-    @apply rounded-lg border border-white/15 bg-black/15 px-4 py-2.5 text-sm text-slate-200 transition hover:border-cyan-300/60 hover:bg-cyan-400/10;
+    @apply rounded-lg border px-4 py-2 text-sm text-slate-200 transition-all duration-300 hover:-translate-y-1 hover:bg-[rgba(255,255,255,0.06)] hover:text-white active:translate-y-0 active:scale-95;
+    border-color: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+    backdrop-filter: blur(4px);
+    border-radius: 10px;
+  }
+
+  .elevated {
+    box-shadow: 0 20px 50px rgba(2,6,23,0.65);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Hero accents and badges */
+  .hero-accent {
+    position: relative;
+    overflow: hidden;
+    border-radius: calc(var(--radius-lg) + 4px);
+    background: linear-gradient(90deg, rgba(255,215,112,0.06), rgba(104,237,216,0.02));
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: all 0.5s ease;
+  }
+
+  .hero-accent:hover {
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 10px 40px rgba(243,194,75,0.08);
+  }
+
+  .hero-accent::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 10% 10%, rgba(110,161,60,0.06), transparent 25%), radial-gradient(circle at 90% 20%, rgba(56,189,248,0.04), transparent 28%);
+    pointer-events: none;
+  }
+
+  .badge-pill {
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-300 hover:scale-105;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .card-compact {
+    @apply rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 8px 28px rgba(2,6,23,0.55);
+  }
+
+  .card-compact:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015));
+    border-color: rgba(255,255,255,0.08);
+    box-shadow: 0 15px 35px rgba(2,6,23,0.7), 0 0 15px rgba(255,255,255,0.02);
+  }
+
+  .icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: inline-grid;
+    place-items: center;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .muted-small {
+    font-size: 0.85rem;
+    color: var(--muted);
   }
 }

@@ -5,10 +5,11 @@ import Navbar from './components/Navbar'
 import HomeSection from './components/HomeSection'
 import PlaySection from './components/PlaySection'
 import LearnSection from './components/LearnSection'
-import ReviewSection from './components/ReviewSection'
 import PuzzleHub from './components/PuzzleHub'
 import WatchSection from './components/WatchSection'
+import ReviewSection from './components/ReviewSection'
 import SocialSection from './components/SocialSection'
+import MyProfileSection from './components/MyProfileSection'
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
 import IntroAnimation from './components/IntroAnimation'
@@ -31,7 +32,7 @@ function App() {
     setMobileOpen
   } = useAppStore()
 
-  const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin
+  const socketUrl = import.meta.env.VITE_SOCKET_URL || (import.meta.env.DEV ? 'http://127.0.0.1:5000' : window.location.origin)
   const [authScreen, setAuthScreen] = useState('signin')
   const [showIntro, setShowIntro] = useState(true)
 
@@ -117,7 +118,6 @@ function App() {
       return (
         <PlaySection
           socket={socket}
-          onReviewClick={() => setActivePage('news')}
           onLearnClick={() => setActivePage('learn')}
         />
       )
@@ -135,12 +135,16 @@ function App() {
       return <WatchSection socket={socket} />
     }
 
-    if (activePage === 'news') {
-      return <ReviewSection socket={socket} onPlayClick={() => setActivePage('play')} />
-    }
-
     if (activePage === 'social') {
       return <SocialSection />
+    }
+
+    if (activePage === 'profile') {
+      return <MyProfileSection />
+    }
+
+    if (activePage === 'review') {
+      return <ReviewSection socket={socket} />
     }
 
     return <HomeSection onPlayClick={() => setActivePage('play')} onPuzzlesClick={() => setActivePage('puzzles')} />
@@ -164,7 +168,12 @@ function App() {
       />
 
       <div className={`relative flex flex-col flex-1 min-w-0 h-full transition-all duration-300 ${collapsed ? 'md:ml-[96px]' : 'md:ml-[256px]'}`}>
-        <Navbar onMenuClick={() => setMobileOpen(true)} status={status} onLogout={logout} />
+        <Navbar
+          onMenuClick={() => setMobileOpen(true)}
+          status={status}
+          onLogout={logout}
+          onProfileClick={() => setActivePage('profile')}
+        />
 
         <main className='flex flex-col flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 py-5 md:px-7 lg:px-8'>
           {renderPage()}
